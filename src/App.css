@@ -1,0 +1,52 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #050712;
+  font-family: system-ui, sans-serif;
+  color: #e5e7eb;
+}
+
+.app-root {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.app-layout {
+  display: flex;
+  gap: 32px;
+  align-items: stretch;   /* <-- stretch both columns to same height */
+}
+
+/* left side */
+.main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+}
+
+.app-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* right side */
+.side-column {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 320px;  /* fixed width, full height */
+}
+

@@ -1,0 +1,105 @@
+{
+    "system": "Frontal Cortex",
+    "slots": 3,
+    "mods": [
+        {
+            "id": "ex-disk",
+            "name": "Ex-Disk",
+            "desc": "+7 Intelligence.",
+            "effects": {
+                "int_add": 7
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "camillo-ram-manager",
+            "name": "Camillo RAM Manager",
+            "desc": "Reroll one failed quickhack per battle.",
+            "effects": {
+                "reroll_quickhack": 1
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "cerebral-coordinator",
+            "name": "Cerebral Coordinator",
+            "desc": "Instantly recharge a use of operating system, once per battle.",
+            "effects": {
+                "recharge_operating_system": 1,
+                "uses_per_battle": 1
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "limbic-system-enchancement",
+            "name": "Limbic System Enchancement",
+            "desc": "Reroll a perfomance check, once per session, increase performance by 2.",
+            "effects": {
+                "reroll_performance": 1,
+                "performance_add": 2,
+                "uses_per_session": 1
+            },
+            "on_roll": 4
+        },
+        {
+            "id": "kerenzikov-boost-system",
+            "name": "Kerenzikov Boost System",
+            "desc": "Increases reflexes by 3. If Kerenzikov is on the player, additionally grant a 5% dodge chance",
+            "effects": {
+                "reflexes_add": 3,
+                "dodge_add": 5
+            },
+            "on_roll": 5
+        },
+        {
+            "id": "bioconductor",
+            "name": "Bioconductor",
+            "desc": "Allows quickhacks to deal critical damage, with a default crit chance of 20%",
+            "effects": {
+                "quickhack_crit_yes": 1,
+                "default_quickhack_crit": 20
+            },
+            "on_roll": 6
+        },
+        {
+            "id": "ram-upgrade",
+            "name": "RAM Upgrade",
+            "desc": "Increases RAM by 1. Increases intelligence by 3.",
+            "effects": {
+                "ram_add": 1,
+                "int_add": 3
+            },
+            "on_roll": 7
+        },
+        {
+            "id": "self-ice",
+            "name": "Self-ICE",
+            "desc": "Completely negates the first status effect inflicted on the player, once per battle",
+            "effects": {
+                "status_effect_negate": 1,
+                "uses_per_battle": 1
+            },
+            "on_roll": 8
+        },
+        {
+            "id": "visual-cortex-support",
+            "name": "Visual Cortex Support",
+            "desc": "Reroll a crafting and driving check, once per session",
+            "effects": {
+                "craft_reroll": 1,
+                "drive_reroll": 1,
+                "uses per_session": 1
+            },
+            "on_roll": 9
+        },
+        {
+            "id": "newton-model",
+            "name": "Newton Model",
+            "desc": "After defeating an enemy, regain 1 RAM",
+            "effects": {
+                "regain_ram": 1
+            },
+            "on_roll": 10
+        }
+    ]
+}

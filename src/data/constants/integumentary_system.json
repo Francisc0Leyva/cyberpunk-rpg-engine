@@ -1,0 +1,103 @@
+{
+    "system": "Integumentary System",
+    "slots": 3,
+    "mods": [
+        {
+            "id": "fireproof-coating",
+            "name": "Fireproof Coating",
+            "desc": "Immune to Burn status effect.",
+            "effects": {
+                "burn_immune": 1
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "nano-plating",
+            "name": "Nano Plating",
+            "desc": "Ranged attacks have a 4% chance of deflecting back towards the attacker.",
+            "effects": {
+                "chance_to_deflect_ranged_attack": 4
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "heat-converter",
+            "name": "Heat Converter",
+            "desc": "When inflicted with burn, deal 25% more melee damage. Unarmed melee has a chance to inflict burn.",
+            "effects": {
+                "condition": "burn_inflicted",
+                "melee_damage_add": 25,
+                "unarmed_melee_burn_chance": 25
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "optical-camo",
+            "name": "Optical Camo",
+            "desc": "+2 evasion.",
+            "effects": {
+                "evasion_add": 2
+            },
+            "on_roll": 4
+        },
+        {
+            "id": "subdermal-armor",
+            "name": "Subdermal Armor",
+            "desc": "Increases HP by 15% of Body.",
+            "effects": {
+                "hp_add_percentage_of_body": 15
+            },
+            "on_roll": 5
+        },
+        {
+            "id": "cellular-adapter",
+            "name": "Cellular Adapter",
+            "desc": "When damage taken exceeds 100, guarantee the next attack to be critical. Resets after a critical is dealt.",
+            "effects": {
+                "condition": "damage_taken_over_100",
+                "crit_auto_next": 1,
+                "resets_after_crit": 1
+            },
+            "on_roll": 6
+        },
+        {
+            "id": "em-resistant-coating",
+            "name": "Electromagnetic Resistant Coating",
+            "desc": "If a quickhack is used against this player, decrease its accuracy by 15%.",
+            "effects": {
+                "enemy_quickhack_accuracy_reduce": 15
+            },
+            "on_roll": 7
+        },
+        {
+            "id": "pain-editor",
+            "name": "Pain Editor",
+            "desc": "Immune to Tolerance checks. Morale cannot be lowered through physical means. Immune to Stun. For every Tolerance point, add 5 HP.",
+            "effects": {
+                "tolerance_check_immune": 1,
+                "morale_lower_physical_immune": 1,
+                "stun_immune": 1,
+                "hp_per_tolerance": 5
+            },
+            "on_roll": 8
+        },
+        {
+            "id": "rangeguard",
+            "name": "Rangeguard",
+            "desc": "Ranged attacks deal 15% less damage.",
+            "effects": {
+                "ranged_damage_taken_reduce": 15
+            },
+            "on_roll": 9
+        },
+        {
+            "id": "proxishield",
+            "name": "Proxishield",
+            "desc": "Melee attacks deal 15% less damage.",
+            "effects": {
+                "melee_damage_taken_reduce": 15
+            },
+            "on_roll": 10
+        }
+    ]
+}

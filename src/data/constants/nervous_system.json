@@ -1,0 +1,109 @@
+{
+    "system": "Nervous System",
+    "slots": 2,
+    "mods": [
+        {
+            "id": "tyrosine-injector",
+            "name": "Tyrosine Injector",
+            "desc": "Lading a critical hit increases your change to mitigate damage taken from an attack by 40%. This has a 50% chance to occur.",
+            "effects": {
+                "condition": "crit_landed",
+                "mitigate_add": 40,
+                "chance_to_occur": 50
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "atomic-sensors",
+            "name": "Atomic Sensors",
+            "desc": "If attacked first at the start of a battle, increases your chance to mitigate damage taken from an attack by 40%. This has a 40% chance to occur.",
+            "effects": {
+                "condition": "attacked_first",
+                "mitigate_add": 40,
+                "chance_to_occur": 40
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "nanorelays",
+            "name": "Nanorelays",
+            "desc": "The first critical hit against you is converted into regular damage.",
+            "effects": {
+                "condition": "attacked_crit",
+                "uses_per_battle": 1
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "neofiber",
+            "name": "NeoFiber",
+            "desc": "Grants a chance to mitigate damage taken from an attack by 40%. This has a 15% chance to occur.",
+            "effects": {
+                "mitigate_add": 40,
+                "chance_to_occur": 15
+            },
+            "on_roll": 4
+        },
+        {
+            "id": "mood-regulator",
+            "name": "Mood Regulator",
+            "desc": "+7 cool.",
+            "effects": {
+                "cool_add": 7
+            },
+            "on_roll": 5
+        },
+        {
+            "id": "synaptic-accelerator",
+            "name": "Synaptic Accelerator",
+            "desc": "At the start of a battle, atacks are guaranteed to hit, with a bonus crit chance of 15%",
+            "effects": {
+                "condition": "start_of_battle",
+                "attack_chance": 100,
+                "crit_chance_add": 15
+            },
+            "on_roll": 6
+        },
+        {
+            "id": "kerenzikov",
+            "name": "Kerenzikov",
+            "desc": "Gain a 10% chance to dodge attacks.",
+            "effects": {
+                "dodge_chance_add": 10
+            },
+            "on_roll": 7
+        },
+        {
+            "id": "stabber",
+            "name": "Stabber",
+            "desc": "Sharp weapons, including Mantis Blades, gain 10% crit chance.",
+            "effects": {
+                "condition": "sharp_weapon",
+                "crit_chance_add": 10
+            },
+            "on_roll": 8
+        },
+        {
+            "id": "nanosurgeons",
+            "name": "Nanosurgeons",
+            "desc": "For every 20% of HP missing, increases your chance to mitigate damage taken by 40%. This has a 4% chance to occur, for every 20% missing.",
+            "effects": {
+                "condition": "per_missing_20%_HP",
+                "mitigate_add": 40,
+                "chance_per_stack": 4
+            },
+            "on_roll": 9
+        },
+        {
+            "id": "reflex-infusor",
+            "name": "Reflex Infusor",
+            "desc": "If you are defeated by a melee attack, return one final attack before being defeated. Cannot heal from this state. Once per battle.",
+            "effects": {
+                "condition": "defeated_by_melee",
+                "return_final_attack": 1,
+                "uses_per_battle": 1
+            },
+            "on_roll": 10
+        }
+    ]
+}

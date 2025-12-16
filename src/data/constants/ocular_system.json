@@ -1,0 +1,108 @@
+{
+    "system": "Ocular System",
+    "slots": 1,
+    "mods": [
+        {
+            "id": "kiroshi-dazzle",
+            "name": "Dazzle",
+            "desc": "Immune to blind. Increased tolerance by 1.",
+            "effects": {
+                "blind_immune": 1,
+                "tolerance_add": 1
+            },
+            "on_roll": 5
+        },
+        {
+            "id": "kiroshi-defunct",
+            "name": "Defunct Kiroshi",
+            "desc": "Ads constantly! Decreased cool by 2.",
+            "effects": {
+                "ads_constantly": 1,
+                "cool_sub": 1
+            },
+            "on_roll": 10
+        },
+        {
+            "id": "kiroshi-focus",
+            "name": "Focus",
+            "desc": "Increases performance by 1. Immune to confuse.",
+            "effects": {
+                "performance_add": 1,
+                "confuse_immune": 1
+            },
+            "on_roll": 8
+        },
+        {
+            "id": "kiroshi-glare",
+            "name": "Glare Resistance",
+            "desc": "Increase tolerance by 1. Immune to daze.",
+            "effects": {
+                "tolerance_add": 1,
+                "daze_immune": 1
+            },
+            "on_roll": 6
+        },
+        {
+            "id": "kiroshi-icognito",
+            "name": "Incognito",
+            "desc": "Increase evasion by 1. Reroll an evasion check, once per session.",
+            "effects": {
+                "evasion_add": 1,
+                "evasion_reroll": 1,
+                "uses per session": 1
+            },
+            "on_roll": 7
+        },
+        {
+            "id": "kiroshi-kameleon",
+            "name": "Kameleon",
+            "desc": "Increase appeal by 1. Increase persuasion by 1",
+            "effects": {
+                "appeal_add": 1,
+                "persuassion_add": 1
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "kiroshi-markdown",
+            "name": "Markdown",
+            "desc": "Grants trait [Gambler]. Increase luck by 1.",
+            "effects": {
+                "gambler_add": 1,
+                "luck_add": 1
+            },
+            "on_roll": 9
+        },
+        {
+            "id": "seethru",
+            "name": "SEETHRU_X3",
+            "desc": "Increases perception by 1. Reroll a perception check, once per session",
+            "effects": {
+                "perception_add": 1,
+                "perception_reroll": 1,
+                "uses per session": 1
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "kiroshi-sentry",
+            "name": "Sentry",
+            "desc": "Increase crafting by 1. Increase driving by 1.",
+            "effects": {
+                "crafting_add": 1,
+                "driving_add": 1
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "kiroshi-stalker",
+            "name": "Stalker",
+            "desc": "Increase intimidation by 1. If attacking first, deal 25% more damage on first attack.",
+            "effects": {
+                "intimidation_add": 1,
+                "first_attack_add": 25
+            },
+            "on_roll": 4
+        }
+    ]
+}

@@ -1,0 +1,58 @@
+{
+    "system": "Legs",
+    "slots": 1,
+    "mods": [
+        {
+            "id": "razor-ankles",
+            "name": "Razor Ankles",
+            "desc": "Grants the wearer the ability to 'Kick', doubling the damage of standard unarmed melee attacks.",
+            "effects": {
+                "grants_attack": {
+                    "id": "kick",
+                    "name": "Kick",
+                    "type": "melee",
+                    "scales_with": "unarmed",
+                    "damage_multiplier": 2
+                }
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "fortified-ankles",
+            "name": "Fortified Ankles",
+            "desc": "Increases Reflexes by 7 points.",
+            "effects": {
+                "reflex_add": 7
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "lynx-paws",
+            "name": "Lynx Paws",
+            "desc": "If attacking first in combat, damage increases by 50%.",
+            "effects": {
+                "condition": "first_strike",
+                "damage_add_percent": 50
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "reinforced-tendons",
+            "name": "Reinforced Tendons",
+            "desc": "Increases Skill by 7 points.",
+            "effects": {
+                "skill_add": 7
+            },
+            "on_roll": 4
+        },
+        {
+            "id": "hidden-compartment-legs",
+            "name": "Hidden Compartment",
+            "desc": "Can be used to store special items.",
+            "effects": {
+                "hidden_compartment": 1
+            },
+            "on_roll": 5
+        }
+    ]
+}

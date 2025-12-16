@@ -1,0 +1,103 @@
+{
+    "system": "Skeleton",
+    "slots": 2,
+    "mods": [
+        {
+            "id": "callus-coalescer",
+            "name": "Callus Coalescer",
+            "desc": "When below 50% HP, melee attack damage is increased by 30%.",
+            "effects": {
+                "condition": "hp_below_50%",
+                "melee_damage_add": 30
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "bionic-joints",
+            "name": "Bionic Joints",
+            "desc": "Reduces all damage taken by 10%.",
+            "effects": {
+                "damage_taken_reduce": 10
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "dense-marrow",
+            "name": "Dense Marrow",
+            "desc": "+15% Melee Damage.",
+            "effects": {
+                "melee_damage_add": 15
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "ram-kinetic-converter",
+            "name": "RAM Kinetic Converter",
+            "desc": "When taking 20% or more damage in a single attack, regenerate one RAM.",
+            "effects": {
+                "condition": "damage_taken_over_20%",
+                "ram_regen": 1
+            },
+            "on_roll": 4
+        },
+        {
+            "id": "epimorphic-skeleton",
+            "name": "Epimorphic Skeleton",
+            "desc": "Increase HP by 10%.",
+            "effects": {
+                "hp_add_percent": 10
+            },
+            "on_roll": 5
+        },
+        {
+            "id": "mechanical-rotary-emulator",
+            "name": "Mechanical Rotary Emulator",
+            "desc": "+7 Technical Ability.",
+            "effects": {
+                "technical_ability_add": 7
+            },
+            "on_roll": 6
+        },
+        {
+            "id": "titanium-bones",
+            "name": "Titanium Bones",
+            "desc": "+7 Strength.",
+            "effects": {
+                "strength_add": 7
+            },
+            "on_roll": 7
+        },
+        {
+            "id": "feen-x",
+            "name": "FEEN-X",
+            "desc": "If RAM reaches 0, instantly regenerate one RAM.",
+            "effects": {
+                "condition": "ram_reaches_0",
+                "ram_instant_regen": 1
+            },
+            "on_roll": 8
+        },
+        {
+            "id": "ram-recoup",
+            "name": "RAM Recoup",
+            "desc": "On taking damage from an enemy attack, 50% chance to restore 1 extra RAM.",
+            "effects": {
+                "condition": "damage_taken",
+                "ram_restore_chance": 50,
+                "ram_restore_amount": 1
+            },
+            "on_roll": 9
+        },
+        {
+            "id": "looped-circuitry",
+            "name": "Looped Circuitry",
+            "desc": "Increase Accuracy by 5% and Crit Rate by 2% for every landed ranged attack. Lasts for three rounds.",
+            "effects": {
+                "accuracy_add_per_ranged_hit": 5,
+                "crit_rate_add_per_ranged_hit": 2,
+                "duration_rounds": 3
+            },
+            "on_roll": 10
+        }
+    ]
+}

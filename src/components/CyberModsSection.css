@@ -1,0 +1,63 @@
+.cybermods-container {
+  background: #020617;
+  border-radius: 12px;
+  border: 1px solid #1f2937;
+  padding: 16px 20px 20px;
+  color: #e5e7eb;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.cybermods-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* grid of systems – tweak columns if you want fewer/more */
+.cybermods-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 20px;
+}
+
+/* individual system */
+.cyber-system-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cyber-system-name {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.select {
+  padding: 4px 6px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.select:disabled {
+  opacity: 0.5;
+}
+
+/* OS tier row */
+.os-tier-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.os-tier-label {
+  font-size: 12px;
+}
+
+.os-tier-select {
+  width: 70px;
+}

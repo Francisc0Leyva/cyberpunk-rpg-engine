@@ -1,0 +1,119 @@
+{
+    "system": "Operating System",
+    "slots": 1,
+    "mods": [
+        {
+            "id": "chrome-compressor",
+            "name": "Chrome Compressor",
+            "desc": "Ignore up to three Cyberpsychosis checks. If the player has Cyberpsychosis, increase Willpower during checks.",
+            "base_effects": {
+                "ignore_psychosis_checks": 3
+            },
+            "tiers": {
+                "1": {
+                    "willpower_add_on_psychosis": 25
+                },
+                "2": {
+                    "willpower_add_on_psychosis": 30
+                },
+                "3": {
+                    "willpower_add_on_psychosis": 35
+                },
+                "4": {
+                    "willpower_add_on_psychosis": 40
+                },
+                "5": {
+                    "psychosis_immunity": 1
+                }
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "berserk",
+            "name": "Berserk",
+            "desc": "Once per battle, reroll an attack (even if it is missed) to be a critical hit. Adds bonus damage depending on tier.",
+            "base_effects": {
+                "crit_reroll_once_per_battle": 1
+            },
+            "tiers": {
+                "1": {
+                    "damage_add_percent": 20
+                },
+                "2": {
+                    "damage_add_percent": 25
+                },
+                "3": {
+                    "damage_add_percent": 30
+                },
+                "4": {
+                    "damage_add_percent": 35
+                },
+                "5": {
+                    "damage_add_percent": 50
+                }
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "cyberdeck",
+            "name": "Cyberdeck",
+            "desc": "Allows the user to manipulate technology and use Quickhacks. Higher tiers increase base RAM.",
+            "base_effects": {
+                "quickhack_enabled": 1
+            },
+            "tiers": {
+                "1": {
+                    "ram_add": 2
+                },
+                "2": {
+                    "ram_add": 3
+                },
+                "3": {
+                    "ram_add": 4
+                },
+                "4": {
+                    "ram_add": 5
+                },
+                "5": {
+                    "ram_add": 6
+                }
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "sandevistan",
+            "name": "Sandevistan",
+            "desc": "Time-dilation OS: allows multiple actions on a cooldown. Tiers adjust cooldown and number of actions.",
+            "base_effects": {
+                "time_dilation": 1
+            },
+            "tiers": {
+                "1": {
+                    "actions_bonus": 2,
+                    "cooldown_turns": 7
+                },
+                "2": {
+                    "actions_bonus": 2,
+                    "cooldown_turns": 6
+                },
+                "3": {
+                    "actions_bonus": 2,
+                    "cooldown_turns": 5
+                },
+                "4": {
+                    "actions_bonus": 2,
+                    "cooldown_turns": 4
+                },
+                "5A": {
+                    "actions_bonus": 3,
+                    "cooldown_turns": 4
+                },
+                "5B": {
+                    "actions_bonus": 2,
+                    "cooldown_turns": 3
+                }
+            },
+            "on_roll": 4
+        }
+    ]
+}

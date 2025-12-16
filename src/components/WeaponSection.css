@@ -1,0 +1,73 @@
+.weapon-container {
+  background: #111827;
+  color: #e5e7eb;
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.weapon-container .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  flex: 1;
+}
+
+.input,
+.select {
+  padding: 4px 6px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.small-input {
+  width: 80px;
+}
+
+.select {
+  flex: 1.2;
+}
+
+/* Flags */
+.weapon-flags {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+/* Optional debug */
+.weapon-debug {
+  margin-top: 10px;
+  font-size: 11px;
+  background: #020617;
+  border-radius: 6px;
+  padding: 6px;
+  border: 1px solid #1f2937;
+}

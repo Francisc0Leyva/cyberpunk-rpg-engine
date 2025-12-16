@@ -1,0 +1,110 @@
+{
+    "system": "Hands",
+    "slots": 1,
+    "mods": [
+        {
+            "id": "ballistic-coprocessor",
+            "name": "Ballistic Coprocessor",
+            "desc": "If a shot misses, 50% chance to reroll that shot. Says 'Ricochet hit' upon hit.",
+            "effects": {
+                "miss_reroll_chance": 50,
+                "special_text": "Ricochet hit"
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "smart-link",
+            "name": "Smart Link",
+            "desc": "For Smart Ranged Weapons, accuracy defaults to 100% but crit rate drops to 0%.",
+            "effects": {
+                "condition": "smart_weapon",
+                "accuracy_set": 100,
+                "crit_rate_set": 0
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "pretty-tattoo",
+            "name": "Pretty Tattoo",
+            "desc": "Increase Intimidation by 1. Adds +1 Hands slot.",
+            "effects": {
+                "intimidation_add": 1,
+                "hands_slots_add": 1
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "scratchers",
+            "name": "Scratchers",
+            "desc": "Unarmed damage is increased by 10%. Critical chance for unarmed damage increases by 10%.",
+            "effects": {
+                "unarmed_damage_add": 10,
+                "unarmed_crit_rate_add": 10
+            },
+            "on_roll": 4
+        },
+        {
+            "id": "rippers",
+            "name": "Rippers",
+            "desc": "Unarmed damage is increased by 15%. Critical chance for unarmed damage increases by 20%. Requires Gorilla Arms.",
+            "effects": {
+                "condition": "requires_gorilla_arms",
+                "unarmed_damage_add": 15,
+                "unarmed_crit_rate_add": 20
+            },
+            "on_roll": 5
+        },
+        {
+            "id": "wolvers",
+            "name": "Wolvers",
+            "desc": "Critical chance for unarmed damage increases by 20%. Crit damage is boosted by 20%. Requires Gorilla Arms.",
+            "effects": {
+                "condition": "requires_gorilla_arms",
+                "unarmed_crit_rate_add": 20,
+                "unarmed_crit_damage_add": 20
+            },
+            "on_roll": 6
+        },
+        {
+            "id": "big-knucks",
+            "name": "Big Knucks",
+            "desc": "Unarmed damage calculation is static, can no longer crit, and is always scaled to the attack’s damage ceiling. Requires Gorilla Arms.",
+            "effects": {
+                "condition": "requires_gorilla_arms",
+                "unarmed_damage_static": 1,
+                "unarmed_disable_crit": 1,
+                "unarmed_scale_to_ceiling": 1
+            },
+            "on_roll": 7
+        },
+        {
+            "id": "slice-n-dice",
+            "name": "Slice N’ Dice",
+            "desc": "Unarmed damage is increased by 25%. Critical hits for unarmed damage now cause Bleed.",
+            "effects": {
+                "unarmed_damage_add": 25,
+                "unarmed_crit_inflict_bleed": 1
+            },
+            "on_roll": 8
+        },
+        {
+            "id": "shock-absorber",
+            "name": "Shock Absorber",
+            "desc": "+10% Accuracy for Ranged attacks.",
+            "effects": {
+                "ranged_accuracy_add": 10
+            },
+            "on_roll": 9
+        },
+        {
+            "id": "carbon-knuckles",
+            "name": "Carbon Knuckles",
+            "desc": "Unarmed damage is increased by 25%. Unarmed Critical chance is now 100%.",
+            "effects": {
+                "unarmed_damage_add": 25,
+                "unarmed_crit_rate_set": 100
+            },
+            "on_roll": 10
+        }
+    ]
+}

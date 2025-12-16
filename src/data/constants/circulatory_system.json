@@ -1,0 +1,104 @@
+{
+    "system": "Circulatory System",
+    "slots": 3,
+    "mods": [
+        {
+            "id": "adrenaline-booster",
+            "name": "Adrenaline Booster",
+            "desc": "Increases the critical hit rate of melee attacks by 10%.",
+            "effects": {
+                "crit_rate_add": 10
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "clutch-padding",
+            "name": "Clutch Padding",
+            "desc": "Immune to Bleeding.",
+            "effects": {
+                "bleeding_immune": 1
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "biomonitor",
+            "name": "Biomonitor",
+            "desc": "When health is below half, convert RAM regenerated into health, with 1 RAM equalling 20 HP.",
+            "effects": {
+                "condition": "hp_below_50",
+                "ram_to_health_rate": 20
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "heal-on-kill",
+            "name": "Heal-On-Kill",
+            "desc": "After defeating an enemy, regenerate 20% of HP.",
+            "effects": {
+                "health_on_kill_percentage": 20,
+                "on_final_blow_health_regen_percent": 100
+            },
+            "on_roll": 4
+        },
+        {
+            "id": "blood-pump",
+            "name": "Blood Pump",
+            "desc": "Regenerate 5% HP per turn.",
+            "effects": {
+                "health_regen_rate": 5
+            },
+            "on_roll": 5
+        },
+        {
+            "id": "feedback-circuit",
+            "name": "Feedback Circuit",
+            "desc": "When dealing a critical hit,, regenerate 10 HP.",
+            "effects": {
+                "condition": "crit_landed",
+                "health_points_on_crit": 10
+            },
+            "on_roll": 6
+        },
+        {
+            "id": "microrotors",
+            "name": "Microrotors",
+            "desc": "Reroll one missed attack of choice, once per session",
+            "effects": {
+                "reroll_attack": 1,
+                "uses per session": 1
+            },
+            "on_roll": 7
+        },
+        {
+            "id": "second-heart",
+            "name": "Second Heart",
+            "desc": "When dealt with a fatal blow, HP becomes 1, rather than defeat",
+            "effects": {
+                "condition": "attacked_fatal",
+                "lifesaver": 1
+            },
+            "on_roll": 8
+        },
+        {
+            "id": "syn-lungs",
+            "name": "Syn-Lungs",
+            "desc": "Increase body by 7. May outlast one swim check every session.",
+            "effects": {
+                "body_add": 7,
+                "swim_check_bypass": 1
+            },
+            "on_roll": 9
+        },
+        {
+            "id": "adrenochrome-surge",
+            "name": "Adrenochrome Surge",
+            "desc": "When health is below 20%, guarantee a critical hit, once per battle",
+            "effects": {
+                "condition": "health_below_20",
+                "crit_auto_on_low_hp": 1,
+                "uses_per_battle": 1
+            },
+            "on_roll": 10
+        }
+    ]
+}

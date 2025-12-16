@@ -1,0 +1,68 @@
+{
+    "system": "Arms",
+    "slots": 1,
+    "mods": [
+        {
+            "id": "gorilla-arms",
+            "name": "Gorilla Arms",
+            "desc": "Allows for the use of more Hands cybermods. Increases unarmed damage by 20%. Counts as Unarmed damage.",
+            "effects": {
+                "has_gorilla_arms": 1,
+                "unarmed_damage_add": 20,
+                "counts_as_unarmed": 1
+            },
+            "on_roll": 1
+        },
+        {
+            "id": "mantis-blades",
+            "name": "Mantis Blades",
+            "desc": "Creates a new attack called 'Slice'. 'Slice' scales off of Cool more than regular attacks.",
+            "effects": {
+                "grants_attack": {
+                    "id": "slice",
+                    "name": "Slice",
+                    "type": "melee",
+                    "scales_with": "cool"
+                }
+            },
+            "on_roll": 2
+        },
+        {
+            "id": "monowire",
+            "name": "Monowire",
+            "desc": "Creates a new attack called 'Whip'. 'Whip' scales off of Intelligence rather than Body.",
+            "effects": {
+                "grants_attack": {
+                    "id": "whip",
+                    "name": "Whip",
+                    "type": "melee",
+                    "scales_with": "intelligence"
+                }
+            },
+            "on_roll": 3
+        },
+        {
+            "id": "projectile-launch-system",
+            "name": "Projectile Launch System",
+            "desc": "Creates a new attack called 'Blast'. 'Blast' is a ranged attack that deals damage based off Technical Ability.",
+            "effects": {
+                "grants_attack": {
+                    "id": "blast",
+                    "name": "Blast",
+                    "type": "ranged",
+                    "scales_with": "technical_ability"
+                }
+            },
+            "on_roll": 4
+        },
+        {
+            "id": "hidden-compartment-arms",
+            "name": "Hidden Compartment",
+            "desc": "Can be used to store special items.",
+            "effects": {
+                "hidden_compartment": 1
+            },
+            "on_roll": 5
+        }
+    ]
+}

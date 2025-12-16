@@ -1,0 +1,9 @@
+{
+    "status_effects": [
+        "Blind",
+        "Confuse",
+        "Slow",
+        "Focus",
+        "Drenched"
+    ]
+}
