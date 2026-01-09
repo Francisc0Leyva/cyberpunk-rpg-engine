@@ -1,18 +1,70 @@
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
 import "./InfoandResultSection.css";
+import type { Character } from "../types/character";
+import {
+  computeDamage,
+  serializeCyberMods,
+  type StatusContext,
+} from "../logic/calculate";
 
-export function InfoAndResultSection() {
-  const [info, setInfo] = useState("");
+type InfoAndResultSectionProps = {
+  character: Character;
+  selectionInfo: string;
+};
+
+export function InfoAndResultSection({
+  character,
+  selectionInfo,
+}: InfoAndResultSectionProps) {
   const [diceExpr, setDiceExpr] = useState("1d20");
   const [result, setResult] = useState("");
 
-  function handleCalculate() {
-    // placeholder for now – hook into real calc later
-    console.log("Calculate clicked with:", {
-      info,
-      diceExpr,
-      // later we’ll pass in attributes, tags, weapon, etc.
+  const serializedCyberMods = useMemo(
+    () => serializeCyberMods(character.cyberMods),
+    [character.cyberMods]
+  );
+
+  function buildStatusPayload(): StatusContext {
+    const ctx: StatusContext = {
+      hp_percent: 100,
+    };
+
+    Object.entries(character.statusEffects).forEach(([name, active]) => {
+      if (active) {
+        ctx[name] = true;
+      }
     });
+
+    return ctx;
+  }
+
+  function handleCalculate() {
+    try {
+      const calcResult = computeDamage(
+        character.attributes,
+        character.tags,
+        serializedCyberMods,
+        {
+          type: character.weapon.type,
+          base_damage: character.weapon.damage,
+          damage: character.weapon.damage,
+          smart: character.weapon.flags.smart,
+          arrows: character.weapon.flags.arrows,
+          alwaysCrit: character.weapon.flags.alwaysCrit,
+          returned: character.weapon.flags.returned,
+          first: character.weapon.flags.first,
+        },
+        buildStatusPayload()
+      );
+      setResult(calcResult);
+    } catch (err) {
+      console.error(err);
+      setResult(
+        `Calculation failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
   }
 
   function rollDice() {
@@ -56,8 +108,9 @@ export function InfoAndResultSection() {
         <div className="info-label">Info</div>
         <textarea
           className="info-textarea"
-          value={info}
-readOnly        />
+          value={selectionInfo}
+          readOnly
+        />
       </div>
 
       {/* Calculate button */}
@@ -89,7 +142,8 @@ readOnly        />
         <textarea
           className="result-textarea"
           value={result}
-readOnly        />
+          readOnly
+        />
       </div>
     </div>
   );

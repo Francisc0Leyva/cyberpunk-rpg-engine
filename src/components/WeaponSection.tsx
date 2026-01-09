@@ -1,62 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./WeaponSection.css";
 
-const WEAPON_TYPES = [
-  "Unarmed Melee",
-  "Blunt Weapon Melee",
-  "Sharp Weapon Melee",
-  "Ranged Attack",
-  "Kick",
-  "Grappling",
-] as const;
+import type {
+  WeaponConfig,
+  WeaponFlags,
+  WeaponType,
+} from "../types/character";
+import { WEAPON_TYPES } from "../types/character";
 
-type WeaponType = (typeof WEAPON_TYPES)[number];
-
-type WeaponFlags = {
-  smart: boolean;
-  arrows: boolean;
-  alwaysCrit: boolean;
-  returned: boolean;
-  first: boolean;
+type WeaponSectionProps = {
+  weapon: WeaponConfig;
+  onChange: (next: WeaponConfig) => void;
 };
 
-export function WeaponSection() {
-  const [weaponType, setWeaponType] = useState<WeaponType>("Unarmed Melee");
-  const [weaponDamage, setWeaponDamage] = useState<number>(0);
+export function WeaponSection({ weapon, onChange }: WeaponSectionProps) {
+  const isUnarmed = weapon.type === "Unarmed Melee";
 
-  const [flags, setFlags] = useState<WeaponFlags>({
-    smart: false,
-    arrows: false,
-    alwaysCrit: false,
-    returned: false,
-    first: false,
-  });
-
-  const isUnarmed = weaponType === "Unarmed Melee";
-
-  // Mimic toggle_weapon_damage: when unarmed, force damage to 0 & disable input
-  useEffect(() => {
-    if (isUnarmed) {
-      setWeaponDamage(0);
-    }
-  }, [isUnarmed]);
+  function updateWeapon(partial: Partial<WeaponConfig>) {
+    onChange({
+      ...weapon,
+      ...partial,
+    });
+  }
 
   function handleDamageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = Number(e.target.value);
     if (Number.isNaN(value)) return;
-    setWeaponDamage(Math.max(0, Math.min(1000, value)));
+    updateWeapon({ damage: Math.max(0, Math.min(1000, value)) });
+  }
+
+  function handleTypeChange(nextType: WeaponType) {
+    updateWeapon({
+      type: nextType,
+      damage: nextType === "Unarmed Melee" ? 0 : weapon.damage,
+    });
   }
 
   function toggleFlag(key: keyof WeaponFlags) {
-    setFlags(prev => ({ ...prev, [key]: !prev[key] }));
+    updateWeapon({
+      flags: { ...weapon.flags, [key]: !weapon.flags[key] },
+    });
   }
-
-  // Later we can lift this up to parent via props
-  const weaponData = {
-    type: weaponType,
-    damage: isUnarmed ? 0 : weaponDamage,
-    ...flags,
-  };
 
   return (
     <div className="weapon-container">
@@ -67,8 +51,8 @@ export function WeaponSection() {
         <label className="label">Weapon Type</label>
         <select
           className="select"
-          value={weaponType}
-          onChange={e => setWeaponType(e.target.value as WeaponType)}
+          value={weapon.type}
+          onChange={e => handleTypeChange(e.target.value as WeaponType)}
         >
           {WEAPON_TYPES.map(type => (
             <option key={type} value={type}>
@@ -86,7 +70,7 @@ export function WeaponSection() {
           min={0}
           max={1000}
           className="input small-input"
-          value={weaponDamage}
+          value={weapon.damage}
           onChange={handleDamageChange}
           disabled={isUnarmed}
         />
@@ -97,7 +81,7 @@ export function WeaponSection() {
         <label className="checkbox-row">
           <input
             type="checkbox"
-            checked={flags.smart}
+            checked={weapon.flags.smart}
             onChange={() => toggleFlag("smart")}
           />
           <span>Smart Weapon</span>
@@ -106,7 +90,7 @@ export function WeaponSection() {
         <label className="checkbox-row">
           <input
             type="checkbox"
-            checked={flags.arrows}
+            checked={weapon.flags.arrows}
             onChange={() => toggleFlag("arrows")}
           />
           <span>Uses Arrows</span>
@@ -115,7 +99,7 @@ export function WeaponSection() {
         <label className="checkbox-row">
           <input
             type="checkbox"
-            checked={flags.alwaysCrit}
+            checked={weapon.flags.alwaysCrit}
             onChange={() => toggleFlag("alwaysCrit")}
           />
           <span>Always Crit</span>
@@ -124,7 +108,7 @@ export function WeaponSection() {
         <label className="checkbox-row">
           <input
             type="checkbox"
-            checked={flags.returned}
+            checked={weapon.flags.returned}
             onChange={() => toggleFlag("returned")}
           />
           <span>Returned Attack</span>
@@ -133,7 +117,7 @@ export function WeaponSection() {
         <label className="checkbox-row">
           <input
             type="checkbox"
-            checked={flags.first}
+            checked={weapon.flags.first}
             onChange={() => toggleFlag("first")}
           />
           <span>Attacking First</span>

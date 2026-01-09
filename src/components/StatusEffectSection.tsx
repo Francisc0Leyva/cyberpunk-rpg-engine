@@ -1,6 +1,6 @@
-import React, { useState } from "react";
 import "./StatusEffectSection.css";
 import statusData from "../data/constants/status_effects.json";
+import type { StatusSelections } from "../types/character";
 
 type StatusJson = {
   status_effects: string[];
@@ -8,16 +8,15 @@ type StatusJson = {
 
 const STATUS_EFFECTS = (statusData as StatusJson).status_effects;
 
-export function StatusEffectsSection() {
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
+type StatusEffectsSectionProps = {
+  selected: StatusSelections;
+  onToggle: (name: string) => void;
+};
 
-  function toggleStatus(name: string) {
-    setSelected(prev => ({
-      ...prev,
-      [name]: !prev[name],
-    }));
-  }
-
+export function StatusEffectsSection({
+  selected,
+  onToggle,
+}: StatusEffectsSectionProps) {
   const selectedCount = Object.values(selected).filter(Boolean).length;
 
   return (
@@ -33,7 +32,7 @@ export function StatusEffectsSection() {
             <input
               type="checkbox"
               checked={!!selected[name]}
-              onChange={() => toggleStatus(name)}
+              onChange={() => onToggle(name)}
             />
             <span className="status-name">{name}</span>
           </label>

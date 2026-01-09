@@ -1,6 +1,6 @@
-import React, { useState } from "react";
 import "./TagsSection.css";
 import tagsData from "../data/constants/tags.json";
+import type { TagSelections } from "../types/character";
 
 // tell TS what the JSON shape is
 type TagsJson = {
@@ -9,17 +9,17 @@ type TagsJson = {
 
 const TAGS = (tagsData as TagsJson).tags;
 
-export function TagsSection() {
-  // keep track of which tags are selected (we'll use this later for logic)
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
+type TagsSectionProps = {
+  selected: TagSelections;
+  onToggle: (tagName: string) => void;
+  onSelectInfo?: (info: string) => void;
+};
 
-  function toggleTag(tagName: string) {
-    setSelected(prev => ({
-      ...prev,
-      [tagName]: !prev[tagName],
-    }));
-  }
-
+export function TagsSection({
+  selected,
+  onToggle,
+  onSelectInfo,
+}: TagsSectionProps) {
   const selectedCount = Object.values(selected).filter(Boolean).length;
 
   return (
@@ -35,7 +35,10 @@ export function TagsSection() {
             <input
               type="checkbox"
               checked={!!selected[name]}
-              onChange={() => toggleTag(name)}
+              onChange={() => {
+                onToggle(name);
+                onSelectInfo?.(`${name}: ${description}`);
+              }}
             />
             <div className="tag-text">
               <div className="tag-name">{name}</div>
