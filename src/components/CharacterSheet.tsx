@@ -172,6 +172,8 @@ export function CharacterSheet() {
               />
               <WeaponSection
                 weapon={character.weapon}
+                tags={character.tags}
+                cyberMods={character.cyberMods}
                 onChange={updateWeapon}
               />
             </div>

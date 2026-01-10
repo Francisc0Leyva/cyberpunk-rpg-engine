@@ -9,6 +9,16 @@ export type AttributeKey =
 
 export type Attributes = Record<AttributeKey, number>;
 
+export const ATTRIBUTE_KEYS: AttributeKey[] = [
+  "body",
+  "willpower",
+  "cool",
+  "intelligence",
+  "reflexes",
+  "skill",
+  "technical",
+];
+
 export const WEAPON_TYPES = [
   "Unarmed Melee",
   "Blunt Weapon Melee",
@@ -16,6 +26,9 @@ export const WEAPON_TYPES = [
   "Ranged Attack",
   "Kick",
   "Grappling",
+  "Slice",
+  "Whip",
+  "Blast",
 ] as const;
 
 export type WeaponType = (typeof WEAPON_TYPES)[number];

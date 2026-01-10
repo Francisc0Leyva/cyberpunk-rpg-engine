@@ -3,6 +3,7 @@ import ocularSystemData from "./constants/ocular_system.json";
 import circulatorySystemData from "./constants/circulatory_system.json";
 import integumentarySystemData from "./constants/integumentary_system.json";
 import operatingSystemData from "./constants/operating_system.json";
+import nervousSystemData from "./constants/nervous_system.json";
 import skeletonData from "./constants/skeleton.json";
 import handsData from "./constants/hands.json";
 import armsData from "./constants/arms.json";
@@ -36,6 +37,7 @@ export const CYBER_SYSTEMS: SystemConfig[] = [
   circulatorySystemData as SystemJson,
   integumentarySystemData as SystemJson,
   operatingSystemData as SystemJson,
+  nervousSystemData as SystemJson,
   skeletonData as SystemJson,
   handsData as SystemJson,
   ocularSystemData as SystemJson,

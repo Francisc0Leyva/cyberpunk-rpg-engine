@@ -1,7 +1,10 @@
-import React from "react";
+import { useEffect, useMemo } from "react";
 import "./WeaponSection.css";
 
 import type {
+  CyberModSystemState,
+  CyberModsState,
+  TagSelections,
   WeaponConfig,
   WeaponFlags,
   WeaponType,
@@ -10,11 +13,67 @@ import { WEAPON_TYPES } from "../types/character";
 
 type WeaponSectionProps = {
   weapon: WeaponConfig;
+  tags: TagSelections;
+  cyberMods: CyberModsState;
   onChange: (next: WeaponConfig) => void;
 };
 
-export function WeaponSection({ weapon, onChange }: WeaponSectionProps) {
+export function WeaponSection({
+  weapon,
+  tags,
+  cyberMods,
+  onChange,
+}: WeaponSectionProps) {
   const isUnarmed = weapon.type === "Unarmed Melee";
+
+  const systemLookup = useMemo(() => {
+    const lookup: Record<string, CyberModSystemState | undefined> = {};
+    Object.entries(cyberMods).forEach(([key, value]) => {
+      lookup[key] = value;
+      lookup[key.toLowerCase()] = value;
+    });
+    return lookup;
+  }, [cyberMods]);
+
+  const armsSlots = systemLookup["arms"]?.slots ?? [];
+  const hasMantis = armsSlots.some(slot => slot === "Mantis Blades");
+  const hasMonowire = armsSlots.some(slot => slot === "Monowire");
+  const hasPLS = armsSlots.some(
+    slot => slot === "Projectile Launch System"
+  );
+
+  const allowedTypes = useMemo(() => {
+    return WEAPON_TYPES.filter(type => {
+      if (type === "Kick") {
+        return Boolean(tags["Thai Kick Boxing"]);
+      }
+      if (type === "Grappling") {
+        return Boolean(tags["Wrestling"]);
+      }
+      if (type === "Slice") {
+        return hasMantis;
+      }
+      if (type === "Whip") {
+        return hasMonowire;
+      }
+      if (type === "Blast") {
+        return hasPLS;
+      }
+      return true;
+    });
+  }, [tags, hasMantis, hasMonowire, hasPLS]);
+
+  useEffect(() => {
+    if (allowedTypes.length === 0) return;
+    if (!allowedTypes.includes(weapon.type)) {
+      const fallback = allowedTypes[0];
+      onChange({
+        ...weapon,
+        type: fallback,
+        damage: fallback === "Unarmed Melee" ? 0 : weapon.damage,
+      });
+    }
+  }, [allowedTypes, weapon, onChange]);
 
   function updateWeapon(partial: Partial<WeaponConfig>) {
     onChange({
@@ -54,7 +113,7 @@ export function WeaponSection({ weapon, onChange }: WeaponSectionProps) {
           value={weapon.type}
           onChange={e => handleTypeChange(e.target.value as WeaponType)}
         >
-          {WEAPON_TYPES.map(type => (
+          {allowedTypes.map(type => (
             <option key={type} value={type}>
               {type}
             </option>

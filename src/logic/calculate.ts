@@ -1,9 +1,11 @@
 import type {
   Attributes,
+  AttributeKey,
   TagSelections,
   CyberModsState,
   WeaponConfig,
 } from "../types/character";
+import { ATTRIBUTE_KEYS } from "../types/character";
 import { CYBER_SYSTEMS } from "../data/cyberSystems";
 
 type LooseRecord = Record<string, any>;
@@ -73,6 +75,10 @@ export function computeDamage(
   weapon: WeaponCalculationInput,
   status: StatusContext = {}
 ): string {
+  const effectiveAttributes = applyCyberAttributeBonuses(
+    attributes,
+    cybermods
+  );
   const [attackType, subtype] = detectAttackCategory(weapon);
 
   if ("smart" in weapon && !("_weapon_smart" in status)) {
@@ -92,23 +98,30 @@ export function computeDamage(
     status._returned_attack = true;
   }
 
-  const technical = Number(attributes.technical ?? 10);
-  const skill = Number(attributes.skill ?? 10);
+  const technical = Number(effectiveAttributes.technical ?? 10);
+  const skill = Number(effectiveAttributes.skill ?? 10);
   const baseHit = baseHitChance(attackType, technical, skill);
   const baseCrit = baseCritChance(skill);
   const critMult =
-    attackType === "melee"
+    attackType === "melee" || subtype === "blast"
       ? meleeCritMultiplier(skill)
       : rangedCritMultiplier(technical);
 
-  const baseDmgRaw = baseDamageFormula(subtype, attributes, weapon, tags ?? {});
-  const baseDmg = ceil1(baseDmgRaw);
-  const baseFormulaText = describeBaseFormula(
+  const baseDmgRaw = baseDamageFormula(
     subtype,
-    attributes,
+    effectiveAttributes,
     weapon,
     tags ?? {}
   );
+  const baseDmg = ceil1(baseDmgRaw);
+  const baseFormulaText = describeBaseFormula(
+    subtype,
+    effectiveAttributes,
+    weapon,
+    tags ?? {}
+  );
+
+  const bonusNotes: string[] = [];
 
   const adjusted = applyCybermodsToNumbers({
     dmg: baseDmg,
@@ -117,10 +130,11 @@ export function computeDamage(
     critMult,
     attackType,
     subtype,
-    attrs: attributes,
+    attrs: effectiveAttributes,
     status,
     cybermods,
     tags: tags ?? {},
+    bonusNotes,
   });
 
   const rollHit = Math.random() <= adjusted.hitChance;
@@ -151,6 +165,10 @@ export function computeDamage(
   lines.push(`Attack: ${subtype.toUpperCase()} (${attackType})`);
   lines.push(`Base Damage: ${baseDmg}`);
   lines.push(`Formula: ${baseFormulaText}`);
+  if (bonusNotes.length > 0) {
+    lines.push("Bonuses:");
+    bonusNotes.forEach(note => lines.push(`  • ${note}`));
+  }
   lines.push(
     `Hit Chance: ${Math.round(adjusted.hitChance * 100)}%  |  Crit Chance: ${Math.round(
       adjusted.critChance * 100
@@ -241,6 +259,79 @@ function collectOsEffects(values: string[]): LooseRecord {
   return effects;
 }
 
+type AttributeBonuses = Partial<Record<AttributeKey, number>>;
+
+const ATTRIBUTE_EFFECT_MAP: Record<string, AttributeKey> = {
+  body_add: "body",
+  strength_add: "body",
+  cool_add: "cool",
+  willpower_add: "willpower",
+  int_add: "intelligence",
+  intelligence_add: "intelligence",
+  reflex_add: "reflexes",
+  reflexes_add: "reflexes",
+  skill_add: "skill",
+  technical_add: "technical",
+  technical_ability_add: "technical",
+};
+
+function applyCyberAttributeBonuses(
+  baseAttributes: Attributes,
+  cybermods: SerializedCyberMods
+): Attributes {
+  const bonuses = collectAttributeBonuses(cybermods);
+  const result: Attributes = { ...baseAttributes };
+  ATTRIBUTE_KEYS.forEach(key => {
+    const baseValue = Number(result[key] ?? 0);
+    const bonusValue = Number(bonuses[key] ?? 0);
+    result[key] = baseValue + bonusValue;
+  });
+  return result;
+}
+
+function collectAttributeBonuses(
+  cybermods: SerializedCyberMods
+): AttributeBonuses {
+  const bonuses: AttributeBonuses = {};
+  const applyFromEffects = (effects?: LooseRecord) => {
+    if (!effects) return;
+    Object.entries(ATTRIBUTE_EFFECT_MAP).forEach(([effectKey, attrKey]) => {
+      const value = effects[effectKey];
+      if (typeof value === "number" && Number.isFinite(value)) {
+        bonuses[attrKey] = (bonuses[attrKey] ?? 0) + value;
+      }
+    });
+  };
+
+  const osKey = syskey("Operating System");
+  const osValues = cybermods?.[osKey];
+  if (osValues) {
+    applyFromEffects(collectOsEffects(osValues));
+  }
+
+  Object.entries(cybermods ?? {}).forEach(([rawSystem, ids]) => {
+    const systemKey = normalizeSystemKey(rawSystem);
+    if (!systemKey || systemKey === osKey) return;
+    const systemData = CYBERMODS_MAP[systemKey];
+    if (!systemData) return;
+    ids.forEach(id => {
+      if (!id || id.startsWith("tier:")) return;
+      const mod = lookupMod(systemKey, id);
+      if (!mod) return;
+      applyFromEffects(mod.effects);
+    });
+  });
+
+  return bonuses;
+}
+
+function normalizeSystemKey(name: string): string | null {
+  if (CYBERMODS_MAP[name]) return name;
+  const normalized = syskey(name);
+  if (CYBERMODS_MAP[normalized]) return normalized;
+  return null;
+}
+
 type AttackCategory = "melee" | "ranged";
 type AttackSubtype =
   | "unarmed"
@@ -324,45 +415,44 @@ function baseDamageFormula(
   }
 
   const skillTilde = tilde(skill, cool + 50);
+  const reflexTerm = reflexes * (0.01 * skillTilde);
+  const weaponFactor = weaponBase > 0 ? weaponBase * 0.01 : 0;
 
   if (subtype === "unarmed") {
-    return body / 10 + cool / 5 + reflexes * (0.01 * skillTilde) + 0.75;
+    return body / 10 + cool / 5 + reflexTerm + 0.75;
   }
 
   if (subtype === "kick") {
-    const base = body / 10 + cool / 5 + reflexes * (0.01 * skillTilde) + 0.75;
+    const base = body / 10 + cool / 5 + reflexTerm + 0.75;
     return 2 * base;
   }
 
   if (subtype === "blunt") {
-    return body / 8 + (weaponBase * 0.01) * skillTilde;
+    const base = body / 8 + cool / 5 + reflexTerm + 0.75;
+    return base * weaponFactor;
   }
 
   if (subtype === "sharp") {
-    let base = body / 10 + cool / 4;
-    base *= weaponBase > 0 ? weaponBase * 0.01 : 1;
-    return base;
+    const base = body / 10 + cool / 4 + reflexTerm + 0.75;
+    return base * weaponFactor;
   }
 
   if (subtype === "whip") {
-    const base =
-      intelligence / 10 + cool / 5 + reflexes * (0.01 * skillTilde) + 0.75;
+    const base = intelligence / 8 + cool / 4 + reflexTerm + 0.75;
     return 1.5 * base;
   }
 
   if (subtype === "slice") {
-    let base = body / 10 + cool / 3;
-    base *= weaponBase > 0 ? weaponBase * 0.01 : 1;
+    const base = body / 10 + cool / 3 + reflexTerm + 0.75;
     return 1.5 * base;
   }
 
   if (subtype === "blast") {
-    return (
-      technical / 2 + reflexes / 10 + (weaponBase * 0.01) * skillTilde
-    ) * 1.5;
+    const base = technical / 8 + cool / 4 + reflexTerm + 0.75;
+    return 1.5 * base;
   }
 
-  return intelligence / 2 + reflexes / 10 + (weaponBase * 0.01) * skillTilde;
+  return intelligence / 2 + reflexes / 10 + weaponFactor * skillTilde;
 }
 
 function describeBaseFormula(
@@ -387,24 +477,26 @@ function describeBaseFormula(
     baseReflex + (hasTag("Brawling") && (subtype === "unarmed" || subtype === "kick") ? 10 : 0);
   const skillTilde = tilde(baseSkill, baseCool + 50);
   const tildeText = `tilde(${baseSkill}, ${baseCool + 50}) = ${skillTilde.toFixed(2)}`;
+  const reflexText = `(Reflexes ${reflexes}) * (0.01 * ${tildeText})`;
+  const weaponFactorText = weaponBase > 0 ? `${weaponBase} * 0.01` : "0";
 
   switch (subtype) {
     case "unarmed":
-      return `((Body ${body}) / 10) + ((Cool ${baseCool}) / 5) + ((Reflexes ${reflexes}) * (0.01 * ${tildeText})) + 0.75`;
+      return `((Body ${body}) / 10) + ((Cool ${baseCool}) / 5) + ${reflexText} + 0.75`;
     case "kick":
-      return `2 * [((Body ${body}) / 10) + ((Cool ${baseCool}) / 5) + ((Reflexes ${reflexes}) * (0.01 * ${tildeText})) + 0.75]`;
+      return `2 * [((Body ${body}) / 10) + ((Cool ${baseCool}) / 5) + ${reflexText} + 0.75]`;
     case "blunt":
-      return `((Body ${body}) / 8) + ((WeaponBase ${weaponBase} * 0.01) * ${tildeText})`;
+      return `(((Body ${body}) / 8) + ((Cool ${baseCool}) / 5) + ${reflexText} + 0.75) * (${weaponFactorText})`;
     case "sharp":
-      return `[(Body ${body} / 10) + (Cool ${baseCool} / 4)] * ${(weaponBase > 0 ? `${weaponBase} * 0.01` : "1")}`;
+      return `(((Body ${body}) / 10) + ((Cool ${baseCool}) / 4) + ${reflexText} + 0.75) * (${weaponFactorText})`;
     case "whip":
-      return `1.5 * [ (Intelligence ${baseInt} / 10) + (Cool ${baseCool} / 5) + (Reflexes ${reflexes} * (0.01 * ${tildeText})) + 0.75 ]`;
+      return `1.5 * [ (Intelligence ${baseInt} / 8) + (Cool ${baseCool} / 4) + ${reflexText} + 0.75 ]`;
     case "slice":
-      return `1.5 * [ (Body ${body} / 10) + (Cool ${baseCool} / 3) ] * ${(weaponBase > 0 ? `${weaponBase} * 0.01` : "1")}`;
+      return `1.5 * [ (Body ${body} / 10) + (Cool ${baseCool} / 3) + ${reflexText} + 0.75 ]`;
     case "blast":
-      return `1.5 * [ (Technical ${baseTechnical} / 2) + (Reflexes ${reflexes} / 10) + ((WeaponBase ${weaponBase} * 0.01) * ${tildeText}) ]`;
+      return `1.5 * [ (Technical ${baseTechnical} / 8) + (Cool ${baseCool} / 4) + ${reflexText} + 0.75 ]`;
     default:
-      return `(Intelligence ${baseInt} / 2) + (Reflexes ${reflexes} / 10) + ((WeaponBase ${weaponBase} * 0.01) * ${tildeText})`;
+      return `(Intelligence ${baseInt} / 2) + (Reflexes ${reflexes} / 10) + ((${weaponFactorText}) * ${tildeText})`;
   }
 }
 
@@ -419,6 +511,7 @@ type CyberAdjustParams = {
   status: StatusContext;
   cybermods: SerializedCyberMods;
   tags: TagSelections;
+  bonusNotes: string[];
 };
 
 type CyberAdjustResult = {
@@ -436,7 +529,7 @@ type CyberAdjustResult = {
 
 function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
   let { dmg, hitChance, critChance, critMult } = params;
-  const { attackType, subtype, status, cybermods, tags } = params;
+  const { attackType, subtype, status, cybermods, tags, bonusNotes } = params;
 
   const flags = {
     force_crit: Boolean(status._force_crit),
@@ -540,7 +633,21 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
       isFirstTurn &&
       attackingFirst
     ) {
-      dmg *= 1 + (effects.damage_add_percent ?? 0) / 100;
+      const pct = effects.damage_add_percent ?? 0;
+      dmg *= 1 + pct / 100;
+      bonusNotes.push(
+        `First Strike bonus: +${pct}% damage from cyberware`
+      );
+    }
+    if (
+      effects.first_attack_add &&
+      attackingFirst &&
+      isFirstTurn
+    ) {
+      dmg *= 1 + effects.first_attack_add / 100;
+      bonusNotes.push(
+        `First Attack bonus: +${effects.first_attack_add}% damage from cyberware`
+      );
     }
     if (
       effects.condition === "hp_below_50" &&
@@ -568,6 +675,17 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
       critChance += effects.crit_rate_add / 100;
     }
     if (
+      effects.crit_chance_add &&
+      conditionAllowsCritBonus(effects.condition)
+    ) {
+      critChance += effects.crit_chance_add / 100;
+      bonusNotes.push(
+        `Critical chance +${effects.crit_chance_add}%${
+          effects.condition ? ` (condition: ${effects.condition})` : ""
+        }`
+      );
+    }
+    if (
       (subtype === "unarmed" || subtype === "kick") &&
       effects.unarmed_crit_rate_add
     ) {
@@ -584,14 +702,6 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
       effects.unarmed_crit_damage_add
     ) {
       critMult *= 1 + effects.unarmed_crit_damage_add / 100;
-    }
-
-    if (
-      effects.condition === "sharp_weapon" &&
-      (subtype === "sharp" || subtype === "slice") &&
-      effects.crit_chance_add
-    ) {
-      critChance += effects.crit_chance_add / 100;
     }
 
     if (
@@ -612,6 +722,20 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
 
     if (effects.health_points_on_crit) {
       procs.push({ on_crit_heal: effects.health_points_on_crit });
+    }
+
+    function conditionAllowsCritBonus(condition?: string): boolean {
+      if (!condition) return true;
+      switch (condition) {
+        case "start_of_battle":
+          return isFirstTurn;
+        case "sharp_weapon":
+          return subtype === "sharp" || subtype === "slice";
+        case "first_strike":
+          return isFirstTurn && attackingFirst;
+        default:
+          return true;
+      }
     }
   }
 }
