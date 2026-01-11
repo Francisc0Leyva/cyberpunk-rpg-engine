@@ -1,4 +1,5 @@
 import type { Character } from "../types/character";
+import { CYBER_SYSTEMS } from "../data/cyberSystems";
 import "./ReadOnlyCharacter.css";
 
 type ReadOnlyCharacterProps = {
@@ -20,6 +21,20 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
       slots: data?.slots ?? [],
       tier: data?.tier,
     })
+  );
+
+  const systemModsLookup = CYBER_SYSTEMS.reduce<Record<string, Map<string, string>>>(
+    (acc, system) => {
+      const map = new Map<string, string>();
+      system.mods.forEach(mod => {
+        if (mod.name && mod.desc) {
+          map.set(mod.name, mod.desc);
+        }
+      });
+      acc[system.system] = map;
+      return acc;
+    },
+    {}
   );
 
   return (
@@ -71,11 +86,16 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
             <strong>{system}</strong>
             {tier ? <span className="readonly-tier">Tier: {tier}</span> : null}
             <ul>
-              {slots.map((slot, idx) => (
-                <li key={`${system}-${idx}`}>
-                  Slot {idx + 1}: {slot}
-                </li>
-              ))}
+              {slots.map((slot, idx) => {
+                const desc = systemModsLookup[system]?.get(slot) ?? "";
+                const detail = desc ? ` - ${desc}` : "";
+                return (
+                  <li key={`${system}-${idx}`}>
+                    Slot {idx + 1}: {slot}
+                    {detail}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}

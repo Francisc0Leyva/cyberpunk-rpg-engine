@@ -100,6 +100,8 @@ export function computeDamage(
 
   const technical = Number(effectiveAttributes.technical ?? 10);
   const skill = Number(effectiveAttributes.skill ?? 10);
+  const cool = Number(effectiveAttributes.cool ?? 10);
+  const skillTilde = tilde(skill, cool + 50);
   const baseHit = baseHitChance(attackType, technical, skill);
   const baseCrit = baseCritChance(skill);
   const critMult =
@@ -111,14 +113,16 @@ export function computeDamage(
     subtype,
     effectiveAttributes,
     weapon,
-    tags ?? {}
+    tags ?? {},
+    skillTilde
   );
   const baseDmg = ceil1(baseDmgRaw);
   const baseFormulaText = describeBaseFormula(
     subtype,
     effectiveAttributes,
     weapon,
-    tags ?? {}
+    tags ?? {},
+    skillTilde
   );
 
   const bonusNotes: string[] = [];
@@ -165,6 +169,7 @@ export function computeDamage(
   lines.push(`Attack: ${subtype.toUpperCase()} (${attackType})`);
   lines.push(`Base Damage: ${baseDmg}`);
   lines.push(`Formula: ${baseFormulaText}`);
+  lines.push(`RAND roll: ${skillTilde}`);
   if (bonusNotes.length > 0) {
     lines.push("Bonuses:");
     bonusNotes.forEach(note => lines.push(`  • ${note}`));
@@ -204,12 +209,14 @@ function clamp01(x: number): number {
   return x;
 }
 
-function tilde(a: number, b: number, cap = 2): number {
-  if (b === 0) return cap;
-  const val = a / b;
-  if (val < 0) return 0;
-  if (val > cap) return cap;
-  return val;
+function tilde(a: number, b: number): number {
+  if (!Number.isFinite(a) || !Number.isFinite(b)) return 0;
+  const min = Math.min(a, b);
+  const max = Math.max(a, b);
+  const minInt = Math.ceil(min);
+  const maxInt = Math.floor(max);
+  if (maxInt < minInt) return Math.round(min);
+  return Math.floor(Math.random() * (maxInt - minInt + 1)) + minInt;
 }
 
 function syskey(name: string): string {
@@ -392,13 +399,13 @@ function baseDamageFormula(
   subtype: AttackSubtype,
   attrs: Attributes,
   weapon: WeaponCalculationInput,
-  tags: TagSelections
+  tags: TagSelections,
+  skillTilde: number
 ): number {
   let body = Number(attrs.body ?? 10);
   let cool = Number(attrs.cool ?? 10);
   let intelligence = Number(attrs.intelligence ?? 10);
   let reflexes = Number(attrs.reflexes ?? 10);
-  const skill = Number(attrs.skill ?? 10);
   const technical = Number(attrs.technical ?? 10);
 
   const weaponBase = Number(
@@ -414,7 +421,6 @@ function baseDamageFormula(
     reflexes += 10;
   }
 
-  const skillTilde = tilde(skill, cool + 50);
   const reflexTerm = reflexes * (0.01 * skillTilde);
   const weaponFactor = weaponBase > 0 ? weaponBase * 0.01 : 0;
 
@@ -459,13 +465,13 @@ function describeBaseFormula(
   subtype: AttackSubtype,
   attrs: Attributes,
   weapon: WeaponCalculationInput,
-  tags: TagSelections
+  tags: TagSelections,
+  skillTilde: number
 ): string {
   const baseBody = Number(attrs.body ?? 10);
   const baseCool = Number(attrs.cool ?? 10);
   const baseInt = Number(attrs.intelligence ?? 10);
   const baseReflex = Number(attrs.reflexes ?? 10);
-  const baseSkill = Number(attrs.skill ?? 10);
   const baseTechnical = Number(attrs.technical ?? 10);
   const weaponBase = Number(
     weapon.base_damage ?? weapon.damage ?? weapon.baseDamage ?? 0
@@ -475,9 +481,10 @@ function describeBaseFormula(
   const body = baseBody + (hasTag("Boxing") && (subtype === "unarmed" || subtype === "kick") ? 10 : 0);
   const reflexes =
     baseReflex + (hasTag("Brawling") && (subtype === "unarmed" || subtype === "kick") ? 10 : 0);
-  const skillTilde = tilde(baseSkill, baseCool + 50);
-  const tildeText = `tilde(${baseSkill}, ${baseCool + 50}) = ${skillTilde.toFixed(2)}`;
-  const reflexText = `(Reflexes ${reflexes}) * (0.01 * ${tildeText})`;
+  const baseSkill = Number(attrs.skill ?? 10);
+  const randText = `RAND(${baseSkill}, ${baseCool + 50}) = ${skillTilde}`;
+  const randScaled = (skillTilde * 0.01).toFixed(2);
+  const reflexText = `(Reflexes ${reflexes}) * (${randScaled} [0.01 * ${randText}])`;
   const weaponFactorText = weaponBase > 0 ? `${weaponBase} * 0.01` : "0";
 
   switch (subtype) {
@@ -496,7 +503,7 @@ function describeBaseFormula(
     case "blast":
       return `1.5 * [ (Technical ${baseTechnical} / 8) + (Cool ${baseCool} / 4) + ${reflexText} + 0.75 ]`;
     default:
-      return `(Intelligence ${baseInt} / 2) + (Reflexes ${reflexes} / 10) + ((${weaponFactorText}) * ${tildeText})`;
+      return `(Intelligence ${baseInt} / 2) + (Reflexes ${reflexes} / 10) + ((${weaponFactorText}) * ${randText})`;
   }
 }
 

@@ -1,0 +1,65 @@
+.cybermods-overview {
+  background: #0f172a;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 18px 22px;
+  color: #e5e7eb;
+  width: 100%;
+}
+
+.cybermods-overview h2 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+}
+
+.cybermods-overview-system {
+  border-top: 1px solid #1f2937;
+  padding: 14px 0;
+}
+
+.cybermods-overview-system:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.cybermods-overview-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cybermods-overview-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.cybermods-overview-tier {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.cybermods-overview-empty {
+  color: #9ca3af;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.cybermods-overview-mod {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 10px;
+}
+
+.cybermods-overview-mod-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.cybermods-overview-mod-desc {
+  font-size: 14px;
+  color: #cbd5f5;
+  margin-bottom: 6px;
+}

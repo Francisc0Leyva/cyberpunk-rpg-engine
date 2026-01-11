@@ -55,8 +55,10 @@ body {
 
 .app-layout {
   display: flex;
-  gap: 32px;
-  align-items: stretch;   /* <-- stretch both columns to same height */
+  flex-direction: column;
+  gap: 24px;
+  align-items: stretch;
+  width: 100%;
 }
 
 /* left side */
@@ -65,6 +67,7 @@ body {
   flex-direction: column;
   gap: 24px;
   flex: 1;
+  width: 100%;
 }
 
 .app-row {
@@ -72,17 +75,38 @@ body {
   flex-wrap: wrap;
   gap: 24px;
   align-items: flex-start;
+  width: 100%;
 }
 
 /* right side */
 .side-column {
   display: flex;
   flex-direction: column;
-  flex: 0 0 320px;  /* fixed width, full height */
+  width: 100%;
 }
 
 .read-only-container {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.stack-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cybermods-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.sheet-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 320px;
 }

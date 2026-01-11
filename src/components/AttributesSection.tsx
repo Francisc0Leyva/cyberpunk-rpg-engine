@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./AttributesSection.css";
 
 import type { Attributes, AttributeKey } from "../types/character";
@@ -23,17 +23,59 @@ export function AttributesSection({
   onChange,
 }: AttributesSectionProps) {
   const [locked, setLocked] = useState(false);
+  const [drafts, setDrafts] = useState<Record<AttributeKey, string>>(
+    () =>
+      Object.fromEntries(
+        Object.entries(attributes).map(([key, value]) => [
+          key,
+          String(value),
+        ])
+      ) as Record<AttributeKey, string>
+  );
+
+  useEffect(() => {
+    setDrafts(
+      Object.fromEntries(
+        Object.entries(attributes).map(([key, value]) => [
+          key,
+          String(value),
+        ])
+      ) as Record<AttributeKey, string>
+    );
+  }, [attributes]);
 
   function updateAttr(key: AttributeKey, value: string) {
-    const n = Number(value);
+    setDrafts(prev => ({
+      ...prev,
+      [key]: value,
+    }));
 
-    // Optional: keep it sane if user deletes the input ("" -> NaN)
-    const safe = Number.isFinite(n) ? n : 0;
+    const n = Number(value);
+    if (!Number.isFinite(n)) return;
+    if (n < 10 || n > 50) return;
 
     onChange({
       ...attributes,
-      [key]: safe,
+      [key]: n,
     });
+  }
+
+  function commitAttr(key: AttributeKey) {
+    const n = Number(drafts[key]);
+    const safe = Number.isFinite(n) ? n : attributes[key];
+    const clamped = Math.max(10, Math.min(50, safe));
+
+    setDrafts(prev => ({
+      ...prev,
+      [key]: String(clamped),
+    }));
+
+    if (clamped !== attributes[key]) {
+      onChange({
+        ...attributes,
+        [key]: clamped,
+      });
+    }
   }
 
   return (
@@ -46,9 +88,12 @@ export function AttributesSection({
           <input
             className="input small-input"
             type="number"
-            value={attributes[key]}
+            min={10}
+            max={50}
+            value={drafts[key]}
             disabled={locked}
             onChange={(e) => updateAttr(key, e.target.value)}
+            onBlur={() => commitAttr(key)}
           />
         </div>
       ))}

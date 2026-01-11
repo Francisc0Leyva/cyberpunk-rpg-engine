@@ -1,0 +1,54 @@
+.dice-card {
+  background: #111827;
+  color: #e5e7eb;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.dice-card .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dice-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dice-label {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dice-input {
+  width: 90px;
+  padding: 4px 6px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.dice-result {
+  flex: 1;
+  font-size: 12px;
+  color: #cbd5f5;
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  border-radius: 6px;
+  padding: 6px 8px;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+}

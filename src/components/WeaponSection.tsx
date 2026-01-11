@@ -24,7 +24,7 @@ export function WeaponSection({
   cyberMods,
   onChange,
 }: WeaponSectionProps) {
-  const isUnarmed = weapon.type === "Unarmed Melee";
+  const isUnarmed = ["Unarmed Melee", "Grappling", "Kick"].includes(weapon.type);
 
   const systemLookup = useMemo(() => {
     const lookup: Record<string, CyberModSystemState | undefined> = {};

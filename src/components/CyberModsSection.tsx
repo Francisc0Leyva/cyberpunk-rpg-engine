@@ -54,6 +54,8 @@ function CyberSystemBlock({
   const totalSlots = isHands ? baseSlots + 1 : baseSlots;
 
   const selected = value?.slots ?? Array(totalSlots).fill("None");
+  const showExtraSlot =
+    isHands && selected.some(name => name === "Pretty Tattoo");
 
   function handleChange(slotIndex: number, newValue: string) {
     const copy = [...selected];
@@ -62,6 +64,13 @@ function CyberSystemBlock({
     if (newValue === "None") {
       for (let i = slotIndex + 1; i < baseSlots; i++) {
         copy[i] = "None";
+      }
+    }
+
+    if (isHands) {
+      const hasPretty = copy.some(name => name === "Pretty Tattoo");
+      if (!hasPretty) {
+        copy[totalSlots - 1] = "None";
       }
     }
 
@@ -96,14 +105,16 @@ function CyberSystemBlock({
     );
   }
 
-  const prettyPresent =
-    isHands && selected.some(name => name === "Pretty Tattoo");
+  const prettyPresent = showExtraSlot;
 
   return (
     <div className="cyber-system-block">
       <div className="cyber-system-name">{config.system}</div>
 
       {selected.map((value, idx) => {
+        if (isHands && idx === totalSlots - 1 && !showExtraSlot) {
+          return null;
+        }
         let enabled: boolean;
 
         if (!isHands || idx < baseSlots) {

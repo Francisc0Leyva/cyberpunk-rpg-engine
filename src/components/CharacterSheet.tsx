@@ -16,6 +16,8 @@ import { WeaponSection } from "./WeaponSection";
 import CyberModsSection from "./CyberModsSection";
 import { InfoAndResultSection } from "./InfoandResultSection";
 import { ReadOnlyCharacter } from "./ReadOnlyCharacter";
+import { CyberModsOverview } from "./CyberModsOverview";
+import { DiceRollSection } from "./DiceRollSection";
 
 function defaultAttributes(): Attributes {
   return {
@@ -64,7 +66,9 @@ export function CharacterSheet() {
   const [selectionInfo, setSelectionInfo] = useState(
     "Select an item to view its description."
   );
-  const [activeTab, setActiveTab] = useState<"edit" | "summary">("edit");
+  const [activeTab, setActiveTab] = useState<
+    "edit" | "summary" | "cybermods"
+  >("edit");
 
   function setAttributes(next: Attributes) {
     setCharacter(prev => ({ ...prev, attributes: next }));
@@ -138,6 +142,14 @@ export function CharacterSheet() {
         >
           Read-Only Summary
         </button>
+        <button
+          className={`tab-button ${
+            activeTab === "cybermods" ? "active" : ""
+          }`}
+          onClick={() => setActiveTab("cybermods")}
+        >
+          Cyber Mods
+        </button>
       </div>
 
       {activeTab === "edit" ? (
@@ -170,19 +182,16 @@ export function CharacterSheet() {
                 selected={character.statusEffects}
                 onToggle={toggleStatus}
               />
-              <WeaponSection
-                weapon={character.weapon}
-                tags={character.tags}
-                cyberMods={character.cyberMods}
-                onChange={updateWeapon}
-              />
+              <div className="stack-column">
+                <DiceRollSection />
+                <WeaponSection
+                  weapon={character.weapon}
+                  tags={character.tags}
+                  cyberMods={character.cyberMods}
+                  onChange={updateWeapon}
+                />
+              </div>
             </div>
-
-            <CyberModsSection
-              selections={character.cyberMods}
-              onSystemChange={updateCyberSystem}
-              onSelectInfo={handleSelectionInfo}
-            />
           </div>
 
           <div className="side-column">
@@ -192,9 +201,18 @@ export function CharacterSheet() {
             />
           </div>
         </div>
-      ) : (
+      ) : activeTab === "summary" ? (
         <div className="read-only-container">
           <ReadOnlyCharacter character={character} />
+        </div>
+      ) : (
+        <div className="cybermods-tab">
+          <CyberModsSection
+            selections={character.cyberMods}
+            onSystemChange={updateCyberSystem}
+            onSelectInfo={handleSelectionInfo}
+          />
+          <CyberModsOverview selections={character.cyberMods} />
         </div>
       )}
     </div>
