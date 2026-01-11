@@ -121,8 +121,7 @@ export function computeDamage(
     subtype,
     effectiveAttributes,
     weapon,
-    tags ?? {},
-    skillTilde
+    tags ?? {}
   );
 
   const bonusNotes: string[] = [];
@@ -167,9 +166,8 @@ export function computeDamage(
 
   const lines: string[] = [];
   lines.push(`Attack: ${subtype.toUpperCase()} (${attackType})`);
-  lines.push(`Base Damage: ${baseDmg}`);
   lines.push(`Formula: ${baseFormulaText}`);
-  lines.push(`RAND roll: ${skillTilde}`);
+  lines.push(`Random roll: ${skillTilde}`);
   if (bonusNotes.length > 0) {
     lines.push("Bonuses:");
     bonusNotes.forEach(note => lines.push(`  • ${note}`));
@@ -184,6 +182,7 @@ export function computeDamage(
     lines.push("Result: MISS");
   } else if (didCrit) {
     lines.push(`Result: CRITICAL HIT — Damage ${finalDamage}`);
+    lines.push(`Base Damage: ${baseDmg}`);
   } else {
     lines.push(`Result: HIT — Damage ${finalDamage}`);
   }
@@ -465,8 +464,7 @@ function describeBaseFormula(
   subtype: AttackSubtype,
   attrs: Attributes,
   weapon: WeaponCalculationInput,
-  tags: TagSelections,
-  skillTilde: number
+  tags: TagSelections
 ): string {
   const baseBody = Number(attrs.body ?? 10);
   const baseCool = Number(attrs.cool ?? 10);
@@ -482,9 +480,8 @@ function describeBaseFormula(
   const reflexes =
     baseReflex + (hasTag("Brawling") && (subtype === "unarmed" || subtype === "kick") ? 10 : 0);
   const baseSkill = Number(attrs.skill ?? 10);
-  const randText = `RAND(${baseSkill}, ${baseCool + 50}) = ${skillTilde}`;
-  const randScaled = (skillTilde * 0.01).toFixed(2);
-  const reflexText = `(Reflexes ${reflexes}) * (${randScaled} [0.01 * ${randText}])`;
+  const randExpr = `RAND(${baseSkill}, ${baseCool + 50})`;
+  const reflexText = `(Reflexes ${reflexes}) * (0.01 * ${randExpr})`;
   const weaponFactorText = weaponBase > 0 ? `${weaponBase} * 0.01` : "0";
 
   switch (subtype) {
@@ -503,7 +500,7 @@ function describeBaseFormula(
     case "blast":
       return `1.5 * [ (Technical ${baseTechnical} / 8) + (Cool ${baseCool} / 4) + ${reflexText} + 0.75 ]`;
     default:
-      return `(Intelligence ${baseInt} / 2) + (Reflexes ${reflexes} / 10) + ((${weaponFactorText}) * ${randText})`;
+      return `(Intelligence ${baseInt} / 2) + (Reflexes ${reflexes} / 10) + ((${weaponFactorText}) * ${randExpr})`;
   }
 }
 
