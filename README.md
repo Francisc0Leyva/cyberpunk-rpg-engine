@@ -1,12 +1,12 @@
 # Cyberpunk 2079 Atlantix
 A web-based character builder and combat calculator for a custom Cyberpunk tabletop RPG system.
-This project is the next evolution of the original desktop calculator, rebuilt from the ground up with a modern web stack and a data-driven design philosophy.
+This project is the next evolution of the original ![desktop calculator](https://github.com/Francisc0Leyva/CyberpunkRPCalc), rebuilt from the ground up with a modern web stack and a data-driven design philosophy.
 
 Current Status: Sandbox Mode
 
 Multiplayer, DM hosting, and persistence are planned but not yet implemented.
 
-## Core principles:
+## Core principles
 
 **Sandbox First**
 - Let players experiment without friction. Rules enforcement is a mode, not a limitation.
