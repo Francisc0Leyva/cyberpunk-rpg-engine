@@ -17,9 +17,21 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
+.tags-summary-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .tags-title {
   font-size: 18px;
   font-weight: 600;
+}
+
+.tags-selected {
+  font-size: 12px;
+  font-style: italic;
+  color: #cbd5f5;
 }
 
 .tags-cost {

@@ -25,6 +25,7 @@ import { ReadOnlyCharacter } from "./ReadOnlyCharacter";
 import { CyberModsOverview } from "./CyberModsOverview";
 import { DiceRollSection } from "./DiceRollSection";
 import { OriginsSection } from "./OriginsSection";
+import { ClassesSection } from "./ClassesSection";
 import {
   getCivilTagBonusSources,
   type CivilBonusSource,
@@ -191,7 +192,7 @@ export function CharacterSheet() {
     origin: defaultOrigin(),
   }));
   const [activeTab, setActiveTab] = useState<
-    "edit" | "summary" | "cybermods" | "tags" | "origins"
+    "edit" | "summary" | "cybermods" | "tags" | "origins" | "classes"
   >("edit");
 
   function setAttributes(next: Attributes) {
@@ -342,6 +343,14 @@ export function CharacterSheet() {
         >
           Origins
         </button>
+        <button
+          className={`tab-button ${
+            activeTab === "classes" ? "active" : ""
+          }`}
+          onClick={() => setActiveTab("classes")}
+        >
+          Class
+        </button>
       </div>
 
       {activeTab === "edit" ? (
@@ -414,13 +423,17 @@ export function CharacterSheet() {
             onChoiceChange={setTagChoice}
           />
         </div>
-      ) : (
+      ) : activeTab === "origins" ? (
         <div className="origins-tab">
           <OriginsSection
             selected={character.origin}
             baseAttributes={character.civilAttributes}
             onConfirm={handleOriginConfirm}
           />
+        </div>
+      ) : (
+        <div className="classes-tab">
+          <ClassesSection />
         </div>
       )}
     </div>

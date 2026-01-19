@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import "./TagsSection.css";
 import tagsData from "../data/constants/tags.json";
 import type { TagChoices, TagSelections } from "../types/character";
@@ -70,6 +71,23 @@ export function TagsSection({
   onChoiceChange,
   onSelectInfo,
 }: TagsSectionProps) {
+  const selectedLabels = useMemo(() => {
+    const items = [...TAG_ITEMS, ...UNCATEGORIZED_TAGS];
+    return items
+      .filter(item => selected[item.name])
+      .map(item => {
+        const choiceId = choices[item.name];
+        if (choiceId && item.choices?.length) {
+          const choice = item.choices.find(
+            option => option.id === choiceId
+          );
+          if (choice) {
+            return `${item.name} (${choice.label})`;
+          }
+        }
+        return item.name;
+      });
+  }, [selected, choices]);
   const totalCost = TAG_ITEMS.reduce((sum, item) => {
     if (!selected[item.name]) return sum;
     const cost = COST_SCALE[item.cost];
@@ -83,7 +101,14 @@ export function TagsSection({
   return (
     <div className="tags-page">
       <div className="tags-summary">
-        <div className="tags-title">Tags</div>
+        <div className="tags-summary-title">
+          <div className="tags-title">Tags</div>
+          <div className="tags-selected">
+            {selectedLabels.length > 0
+              ? selectedLabels.join(", ")
+              : "No tags selected"}
+          </div>
+        </div>
         <div className="tags-cost">
           Costs {totalCost} {pointsName}
         </div>

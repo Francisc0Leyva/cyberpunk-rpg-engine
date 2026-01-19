@@ -53,3 +53,8 @@
 .attributes-block input[type="number"] {
   -moz-appearance: textfield;
 }
+
+.attributes-block .checkbox-row {
+  font-size: 11px;
+  color: #9ca3af;
+}
