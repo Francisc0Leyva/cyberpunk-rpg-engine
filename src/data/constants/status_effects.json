@@ -1,9 +1,10 @@
 {
     "status_effects": [
-        "Blind",
-        "Confuse",
-        "Slow",
-        "Focus",
-        "Drenched"
+    "Blind",
+    "Confuse",
+    "Slow",
+    "Focus",
+    "Drenched",
+    "Attacked By Fist Last Turn"
     ]
 }

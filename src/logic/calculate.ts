@@ -7,8 +7,45 @@ import type {
 } from "../types/character";
 import { ATTRIBUTE_KEYS } from "../types/character";
 import { CYBER_SYSTEMS } from "../data/cyberSystems";
+import tagsData from "../data/constants/tags.json";
 
 type LooseRecord = Record<string, any>;
+
+type TagsRules = {
+  pointsName?: string;
+  costScale?: Record<string, number>;
+  statCap?: number;
+  cannotExceedStatCapUsingTags?: boolean;
+};
+
+type TagEffect = {
+  kind?: string;
+  target?: string;
+  op?: string;
+  value?: number;
+  cap?: number;
+};
+
+type TagItem = {
+  name: string;
+  effects?: TagEffect[];
+};
+
+type TagsJson = {
+  version?: number;
+  rules?: TagsRules;
+  items?: Record<string, TagItem>;
+};
+
+const TAGS_DATA = tagsData as TagsJson;
+const TAG_ITEMS_BY_NAME = Object.values(
+  TAGS_DATA.items ?? {}
+).reduce<Record<string, TagItem>>((acc, item) => {
+  if (item?.name) {
+    acc[item.name] = item;
+  }
+  return acc;
+}, {});
 
 type WeaponCalculationInput = Partial<WeaponConfig> & {
   type: string;
@@ -75,11 +112,18 @@ export function computeDamage(
   weapon: WeaponCalculationInput,
   status: StatusContext = {}
 ): string {
-  const effectiveAttributes = applyCyberAttributeBonuses(
+  const [attackType, subtype] = detectAttackCategory(weapon);
+  const relevantKeys = getRelevantAttributeKeys(attackType, subtype);
+  const cyberAttributes = applyCyberAttributeBonuses(
     attributes,
     cybermods
   );
-  const [attackType, subtype] = detectAttackCategory(weapon);
+  const tagApply = applyTagAttributeBonuses(
+    cyberAttributes,
+    tags ?? {},
+    relevantKeys
+  );
+  const effectiveAttributes = tagApply.attributes;
 
   if ("smart" in weapon && !("_weapon_smart" in status)) {
     status._weapon_smart = Boolean(weapon.smart);
@@ -96,6 +140,9 @@ export function computeDamage(
   }
   if (weapon.returned) {
     status._returned_attack = true;
+  }
+  if (weapon.type?.toLowerCase() === "grappling") {
+    status._grappling = true;
   }
 
   const technical = Number(effectiveAttributes.technical ?? 10);
@@ -123,8 +170,25 @@ export function computeDamage(
     weapon,
     tags ?? {}
   );
+  const isGrappling = Boolean(status._grappling);
+  const grappleRoll = isGrappling
+    ? Math.floor(Math.random() * 20) + 1
+    : null;
+  const grapplePass =
+    isGrappling && grappleRoll !== null ? grappleRoll >= 5 : false;
+  const grappleFailed = isGrappling && !grapplePass;
 
   const bonusNotes: string[] = [];
+  const modifierNotes: string[] = [
+    ...collectAttributeModifierNotes(
+      attributes,
+      cyberAttributes,
+      relevantKeys,
+      "cybermods"
+    ),
+    ...tagApply.notes,
+    ...collectTagAttributeNotes(subtype, tags ?? {}),
+  ];
 
   const adjusted = applyCybermodsToNumbers({
     dmg: baseDmg,
@@ -161,6 +225,10 @@ export function computeDamage(
       finalDamage *= adjusted.critMult;
     }
   }
+  if (grappleFailed) {
+    finalDamage = 0;
+    didCrit = false;
+  }
 
   finalDamage = ceil1(finalDamage);
 
@@ -168,9 +236,10 @@ export function computeDamage(
   lines.push(`Attack: ${subtype.toUpperCase()} (${attackType})`);
   lines.push(`Formula: ${baseFormulaText}`);
   lines.push(`Random roll: ${skillTilde}`);
-  if (bonusNotes.length > 0) {
-    lines.push("Bonuses:");
-    bonusNotes.forEach(note => lines.push(`  • ${note}`));
+  const allNotes = [...modifierNotes, ...bonusNotes];
+  if (allNotes.length > 0) {
+    lines.push("Modifiers:");
+    allNotes.forEach(note => lines.push(`  • ${note}`));
   }
   lines.push(
     `Hit Chance: ${Math.round(adjusted.hitChance * 100)}%  |  Crit Chance: ${Math.round(
@@ -180,6 +249,8 @@ export function computeDamage(
 
   if (!rollHit) {
     lines.push("Result: MISS");
+  } else if (grappleFailed) {
+    lines.push("Result: GRAPPLE FAILED — Damage 0");
   } else if (didCrit) {
     lines.push(`Result: CRITICAL HIT — Damage ${finalDamage}`);
     lines.push(`Base Damage: ${baseDmg}`);
@@ -187,10 +258,34 @@ export function computeDamage(
     lines.push(`Result: HIT — Damage ${finalDamage}`);
   }
 
+  if (isGrappling && grappleRoll !== null) {
+    lines.push(
+      `Grapple Check: 1d20 = ${grappleRoll} — ${
+        grapplePass ? "PASS" : "FAIL"
+      }`
+    );
+  }
+
+  if (rollHit && !grappleFailed) {
+    adjusted.procs.forEach(proc => {
+      if (proc.kind === "on_hit_status") {
+        if (Math.random() <= proc.chance) {
+          lines.push(
+            `Proc: ${proc.status}${
+              proc.source ? ` — ${proc.source}` : ""
+            }`
+          );
+        }
+      }
+    });
+  }
+
   if (rollHit && didCrit) {
     adjusted.procs.forEach(proc => {
-      if ("on_crit_heal" in proc) {
-        lines.push(`Proc: Feedback Circuit — Heal +${proc.on_crit_heal} HP`);
+      if (proc.kind === "on_crit_heal") {
+        lines.push(
+          `Proc: Feedback Circuit — Heal +${proc.amount} HP`
+        );
       }
     });
   }
@@ -293,6 +388,137 @@ function applyCyberAttributeBonuses(
     result[key] = baseValue + bonusValue;
   });
   return result;
+}
+
+const ATTRIBUTE_LABELS: Record<AttributeKey, string> = {
+  body: "Body",
+  willpower: "Willpower",
+  cool: "Cool",
+  intelligence: "Intelligence",
+  reflexes: "Reflexes",
+  skill: "Skill",
+  technical: "Technical Ability",
+};
+
+const TAG_ATTRIBUTE_TARGETS: Record<string, AttributeKey> = {
+  "attributes.body": "body",
+  "attributes.willpower": "willpower",
+  "attributes.cool": "cool",
+  "attributes.intelligence": "intelligence",
+  "attributes.reflexes": "reflexes",
+  "attributes.skill": "skill",
+  "attributes.technical": "technical",
+  "attributes.technical_ability": "technical",
+};
+
+function collectAttributeModifierNotes(
+  baseAttributes: Attributes,
+  effectiveAttributes: Attributes,
+  relevantKeys: AttributeKey[],
+  sourceLabel: string
+): string[] {
+  const notes: string[] = [];
+  relevantKeys.forEach(key => {
+    const baseValue = Number(baseAttributes[key] ?? 0);
+    const effectiveValue = Number(effectiveAttributes[key] ?? 0);
+    const diff = effectiveValue - baseValue;
+    if (diff === 0) return;
+    const sign = diff > 0 ? "+" : "-";
+    notes.push(
+      `${sign}${Math.abs(diff)} ${ATTRIBUTE_LABELS[key]} (${sourceLabel})`
+    );
+  });
+  return notes;
+}
+
+function applyTagAttributeBonuses(
+  baseAttributes: Attributes,
+  tags: TagSelections,
+  relevantKeys?: AttributeKey[]
+): { attributes: Attributes; notes: string[] } {
+  const result: Attributes = { ...baseAttributes };
+  const notes: string[] = [];
+  const rules = TAGS_DATA.rules ?? {};
+  const cap =
+    typeof rules.statCap === "number" ? rules.statCap : null;
+  const enforceCap = Boolean(
+    rules.cannotExceedStatCapUsingTags
+  );
+
+  Object.entries(tags).forEach(([tagName, enabled]) => {
+    if (!enabled) return;
+    const item = TAG_ITEMS_BY_NAME[tagName];
+    if (!item?.effects?.length) return;
+    item.effects.forEach(effect => {
+      if (effect.kind !== "stat") return;
+      if (effect.op && effect.op !== "add") return;
+      if (!effect.target) return;
+      const attrKey = TAG_ATTRIBUTE_TARGETS[effect.target];
+      if (!attrKey) return;
+      const rawValue = Number(effect.value);
+      if (!Number.isFinite(rawValue) || rawValue === 0) return;
+
+      const current = Number(result[attrKey] ?? 0);
+      let applied = rawValue;
+      if (enforceCap && typeof cap === "number") {
+        const remaining = cap - current;
+        if (remaining <= 0) {
+          applied = 0;
+        } else if (applied > remaining) {
+          applied = remaining;
+        }
+      }
+
+      if (applied === 0) return;
+      result[attrKey] = current + applied;
+      if (!relevantKeys || relevantKeys.includes(attrKey)) {
+        const sign = applied > 0 ? "+" : "-";
+        notes.push(
+          `${sign}${Math.abs(applied)} ${ATTRIBUTE_LABELS[attrKey]} (${item.name})`
+        );
+      }
+    });
+  });
+
+  return { attributes: result, notes };
+}
+
+function getRelevantAttributeKeys(
+  attackType: AttackCategory,
+  subtype: AttackSubtype
+): AttributeKey[] {
+  switch (subtype) {
+    case "unarmed":
+    case "kick":
+    case "blunt":
+    case "sharp":
+    case "slice":
+      return ["body", "cool", "reflexes", "skill"];
+    case "whip":
+      return ["intelligence", "cool", "reflexes", "skill"];
+    case "blast":
+      return ["technical", "cool", "reflexes", "skill"];
+    default:
+      return attackType === "ranged"
+        ? ["intelligence", "reflexes", "skill", "technical", "cool"]
+        : ["body", "cool", "reflexes", "skill"];
+  }
+}
+
+function collectTagAttributeNotes(
+  subtype: AttackSubtype,
+  tags: TagSelections
+): string[] {
+  const notes: string[] = [];
+  const isUnarmed =
+    subtype === "unarmed" || subtype === "kick";
+  if (isUnarmed && tags["Boxing"]) {
+    notes.push("+10 Body (Boxing)");
+  }
+  if (isUnarmed && tags["Brawling"]) {
+    notes.push("+10 Reflexes (Brawling)");
+  }
+  return notes;
 }
 
 function collectAttributeBonuses(
@@ -419,6 +645,8 @@ function baseDamageFormula(
   if (hasTag("Brawling") && (subtype === "unarmed" || subtype === "kick")) {
     reflexes += 10;
   }
+  body = Math.min(50, body);
+  reflexes = Math.min(50, reflexes);
 
   const reflexTerm = reflexes * (0.01 * skillTilde);
   const weaponFactor = weaponBase > 0 ? weaponBase * 0.01 : 0;
@@ -476,9 +704,20 @@ function describeBaseFormula(
   );
   const hasTag = (tag: string): boolean => Boolean(tags?.[tag]);
 
-  const body = baseBody + (hasTag("Boxing") && (subtype === "unarmed" || subtype === "kick") ? 10 : 0);
-  const reflexes =
-    baseReflex + (hasTag("Brawling") && (subtype === "unarmed" || subtype === "kick") ? 10 : 0);
+  const body = Math.min(
+    50,
+    baseBody +
+      (hasTag("Boxing") && (subtype === "unarmed" || subtype === "kick")
+        ? 10
+        : 0)
+  );
+  const reflexes = Math.min(
+    50,
+    baseReflex +
+      (hasTag("Brawling") && (subtype === "unarmed" || subtype === "kick")
+        ? 10
+        : 0)
+  );
   const baseSkill = Number(attrs.skill ?? 10);
   const randExpr = `RAND(${baseSkill}, ${baseCool + 50})`;
   const reflexText = `(Reflexes ${reflexes}) * (0.01 * ${randExpr})`;
@@ -528,8 +767,17 @@ type CyberAdjustResult = {
     disable_crit: boolean;
     force_max_roll: boolean;
   };
-  procs: Array<Record<string, number>>;
+  procs: Proc[];
 };
+
+type Proc =
+  | { kind: "on_crit_heal"; amount: number }
+  | {
+      kind: "on_hit_status";
+      status: string;
+      chance: number;
+      source?: string;
+    };
 
 function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
   let { dmg, hitChance, critChance, critMult } = params;
@@ -540,7 +788,7 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
     disable_crit: false,
     force_max_roll: false,
   };
-  const procs: Array<Record<string, number>> = [];
+  const procs: Proc[] = [];
 
   const isFirstTurn = Boolean(status.is_first_turn);
   const attackingFirst = Boolean(status.attacking_first);
@@ -574,24 +822,90 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
   });
 
   const activeTags = tags ?? {};
+  const isUnarmed =
+    subtype === "unarmed" || subtype === "kick";
+  const attackedByFistLastTurn = Boolean(
+    status.attacked_by_fist_last_turn ||
+      status.attacked_by_fist ||
+      status["Attacked By Fist Last Turn"]
+  );
   if (attackType === "melee" && activeTags["Melee Training"]) {
     critChance += 0.05;
+    bonusNotes.push("Melee Training: +5% crit chance");
   }
   if (
     activeTags.Fencing &&
     (subtype === "sharp" || subtype === "slice")
   ) {
     critChance += 0.15;
+    bonusNotes.push("Fencing: +15% crit chance");
   }
-  if (activeTags.Aikido && (subtype === "unarmed" || subtype === "kick")) {
+  if (activeTags.Aikido && isUnarmed) {
     dmg *= 1.25;
+    bonusNotes.push("Aikido: +25% unarmed damage");
+  }
+  if (activeTags["Tae Kwon Do"] && isUnarmed && isFirstTurn && attackingFirst) {
+    dmg *= 1.5;
+    bonusNotes.push(
+      "Tae Kwon Do: +50% unarmed damage on first strike"
+    );
+  }
+  if (activeTags.Karate && isUnarmed && attackedByFistLastTurn) {
+    dmg *= 1.2;
+    bonusNotes.push(
+      "Karate: +20% damage after fist attack last turn"
+    );
   }
   if (activeTags.Archery && attackType === "ranged" && status._weapon_arrows) {
     hitChance += 0.15;
     critChance += 0.15;
+    bonusNotes.push("Archery: +15% hit/crit chance");
+  }
+  if (activeTags["Animal Kung Fu"] && isUnarmed) {
+    procs.push({
+      kind: "on_hit_status",
+      status: "Stun",
+      chance: 0.15,
+      source: "Animal Kung Fu",
+    });
+    bonusNotes.push(
+      "Animal Kung Fu: 15% chance to Stun on hit"
+    );
+  }
+  if (activeTags.Capoeria && isUnarmed) {
+    procs.push({
+      kind: "on_hit_status",
+      status: "Confuse",
+      chance: 0.2,
+      source: "Capoeria",
+    });
+    bonusNotes.push(
+      "Capoeria: 20% chance to Confuse on hit"
+    );
+  }
+  if (activeTags["Choi Li Fut"] && isUnarmed) {
+    bonusNotes.push(
+      "Choi Li Fut: Unarmed attacks are pure damage (ignore shields)"
+    );
+  }
+  if (activeTags.Judo && isUnarmed) {
+    procs.push({
+      kind: "on_hit_status",
+      status: "Taunt",
+      chance: 0.25,
+      source: "Judo",
+    });
+    bonusNotes.push("Judo: 25% chance to Taunt on hit");
   }
   if (activeTags["Thai Kick Boxing"] && subtype === "kick") {
-    dmg *= 1.5;
+    bonusNotes.push(
+      "Thai Kick Boxing: Kick doubles unarmed damage"
+    );
+  }
+  if (activeTags.Wrestling && status._grappling) {
+    bonusNotes.push(
+      "Wrestling: Grapple check requires 1d20 roll >= 5"
+    );
   }
 
   hitChance = clamp01(hitChance);
@@ -725,7 +1039,10 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
     }
 
     if (effects.health_points_on_crit) {
-      procs.push({ on_crit_heal: effects.health_points_on_crit });
+      procs.push({
+        kind: "on_crit_heal",
+        amount: effects.health_points_on_crit,
+      });
     }
 
     function conditionAllowsCritBonus(condition?: string): boolean {

@@ -1,18 +1,622 @@
 {
-    "tags": {
-        "Aikido": "+25% Unarmed damage.",
-        "Animal Kung Fu": "15% chance to cause Stun (Unarmed).",
-        "Archery": "+15% hit/crit if using arrows.",
-        "Boxing": "+10 Body for Unarmed.",
-        "Brawling": "+10 Reflexes for Unarmed.",
-        "Capoeria": "20% chance to cause Confuse (Unarmed).",
-        "Choi Li Fut": "Adds 'Pure damage' text (Unarmed).",
-        "Fencing": "+15% crit for all bladed weapons.",
-        "Judo": "25% chance to cause Taunt (Unarmed).",
-        "Karate": "Special future-based modifier.",
-        "Melee Training": "+5% crit for all melee.",
-        "Tae Kwon Do": "Prefix 'Surprise'. Shows full formula.",
-        "Thai Kick Boxing": "Enables kick damage type; +50% damage, doesn't use cyberwear.",
-        "Wrestling": "Enables grappling damage type; may stun the enemy."
+  "version": 1,
+  "rules": {
+    "pointsName": "Tag Points",
+    "spendableOn": ["skills", "tags", "traits"],
+    "statCap": 50,
+    "cannotExceedStatCapUsingTags": true,
+    "startingPoints": {
+      "default": { "method": "roll", "dice": "3d5" },
+      "classOverrides": {
+        "techie": {
+          "choice": [
+            { "method": "roll", "dice": "1d10" },
+            { "method": "flat", "value": 5 }
+          ],
+          "bonus": 5
+        }
+      }
+    },
+    "costScale": {
+      "+": 1,
+      "++": 2,
+      "+++": 3,
+      "++++": 4
     }
+  },
+  "categories": [
+    { "id": "martial_arts", "name": "Martial Arts" },
+    { "id": "body_cool_willpower", "name": "Body / Cool / Willpower" },
+    { "id": "int_tech_skill", "name": "Intelligence / Technical / Skill" },
+    { "id": "reflex", "name": "Reflex" }
+  ],
+  "items": {
+    "aikido": {
+      "name": "Aikido",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "+++",
+      "description": "This form relies on using the opponent's strength and momentum against them. Increase unarmed damage by 25%.",
+      "effects": [
+        {
+          "kind": "modifier",
+          "target": "combat.unarmed.damageMultiplier",
+          "op": "mul",
+          "value": 1.25
+        }
+      ]
+    },
+    "animal_kung_fu": {
+      "name": "Animal Kung Fu",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "+++",
+      "description": "Forms based on animal movements. Unarmed melee attacks have a 15% chance to cause Stun.",
+      "effects": [
+        {
+          "kind": "onHitStatus",
+          "condition": { "weaponType": "unarmed" },
+          "status": "stun",
+          "chance": 0.15
+        }
+      ]
+    },
+    "boxing": {
+      "name": "Boxing",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "+",
+      "description": "The art of fisticuffs. +10 Body for unarmed damage calculation.",
+      "effects": []
+    },
+    "capoeria": {
+      "name": "Capoeria",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "+++",
+      "description": "Dancelike movements with fast kicks and low line sweeps. All unarmed attacks have a 20% chance of causing Confuse.",
+      "effects": []
+    },
+    "choi_li_fut": {
+      "name": "Choi Li Fut",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "+++",
+      "description": "Combines powerful roundhouse blows and sweeping kicks. All unarmed attacks go through Shields and deal Pure damage.",
+      "effects": []
+    },
+    "judo": {
+      "name": "Judo",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "+",
+      "description": "Effective in combat. All unarmed attacks have a 25% chance to Taunt the enemy.",
+      "effects": []
+    },
+    "karate": {
+      "name": "Karate",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "++",
+      "description": "When attacking an enemy that attacked you with a fist-related attack the previous turn, deal 20% extra damage.",
+      "effects": []
+    },
+    "tae_kwon_do": {
+      "name": "Tae Kwon Do",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "+++",
+      "description": "If attacking first, deal 50% more unarmed damage on the first strike.",
+      "effects": []
+    },
+    "thai_kick_boxing": {
+      "name": "Thai Kick Boxing",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "++++",
+      "description": "Requires Strength Training. Allows the player to {Kick}, doubling the damage of unarmed attacks.",
+      "effects": []
+    },
+    "wrestling": {
+      "name": "Wrestling",
+      "type": "tag",
+      "categoryId": "martial_arts",
+      "cost": "+",
+      "description": "Allows the player to {Grapple}, stunning both the player and the opponent for one turn. Roll 1d20; less than 5 fails.",
+      "effects": []
+    },
+    "attractive": {
+      "name": "Attractive",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "The character is considered objectively attractive. (+2 Appeal base rating)",
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.appeal",
+          "op": "add",
+          "value": 2,
+          "cap": 50
+        }
+      ]
+    },
+    "aware": {
+      "name": "Aware",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Extra Intelligence check when investigating inanimate objects. [+1 Evasion, +1 Perception]",
+      "effects": [
+        { "kind": "stat", "target": "civil.evasion", "op": "add", "value": 1, "cap": 50 },
+        { "kind": "stat", "target": "civil.perception", "op": "add", "value": 1, "cap": 50 },
+        {
+          "kind": "rule",
+          "target": "checks.investigate.inanimate",
+          "op": "grantExtraCheck",
+          "value": 1
+        }
+      ]
+    },
+    "endurant": {
+      "name": "Endurant",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Withstand pain or hardship. Go longer without food, sleep, or water. [+2 Tolerance]",
+      "effects": []
+    },
+    "intimidating": {
+      "name": "Intimidating",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Intimidate others by force of personality or physical coercion. [+2 Intimidation]",
+      "effects": []
+    },
+    "drug_torture_tolerance": {
+      "name": "Drug/Torture Tolerance",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Withstand drugs or harsh pain. Cannot be drugged or black-out drunk. [+2 Tolerance]",
+      "effects": []
+    },
+    "human_perception": {
+      "name": "Human Perception",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Detect lies, evasions, moods, and emotional clues from others. [+2 Perception]",
+      "effects": []
+    },
+    "leadership": {
+      "name": "Leadership",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Lead and convince people to follow you. [+1 Persuasion, +1 Intimidation. One may be substituted for +1 Appeal]",
+      "effects": []
+    },
+    "social": {
+      "name": "Social",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Deal with social situations. [+2 Persuasion or +2 Appeal]",
+      "effects": []
+    },
+    "debate": {
+      "name": "Debate",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Convince others to see your viewpoint. [+2 Intimidation or Persuasion]",
+      "effects": []
+    },
+    "pick_pocket": {
+      "name": "Pick Pocket",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "++",
+      "description": "Pick pockets or shoplift unnoticed. [+1 Perception, +1 Evasion]",
+      "effects": []
+    },
+    "anthropology_expertise": {
+      "name": "Anthropology Expertise",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Knowledge of human cultures, habits, and customs. Grants knowledge of Anthropology. [+1 Luck]",
+      "effects": []
+    },
+    "artificial_intelligence_expertise": {
+      "name": "Artificial Intelligence Expertise",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Knowledge of intelligence beyond the comprehension of humans. Grants expertise of Artificial Intelligence.",
+      "effects": []
+    },
+    "archery": {
+      "name": "Archery",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Skill required to use bows and arrow-based weapons. Grants knowledge of Arrowed Weapons and a bonus to arrowed attacks.",
+      "effects": []
+    },
+    "biology": {
+      "name": "Biology",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Knowledge of animals, plants, and biological systems. Grants knowledge of Biology. [+1 Persuasion]",
+      "effects": []
+    },
+    "botany": {
+      "name": "Botany",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Knowledge of plants and identification. Grants knowledge of Botany. [+1 Tolerance]",
+      "effects": []
+    },
+    "chemistry": {
+      "name": "Chemistry",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Skill for mixing chemicals and creating compounds. Grants knowledge of Chemistry. [+1 Crafting]",
+      "effects": []
+    },
+    "composition": {
+      "name": "Composition",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Skill for writing songs, articles, or stories. Grants knowledge of Writing. [+1 Performance]",
+      "effects": []
+    },
+    "clever": {
+      "name": "Clever",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "++",
+      "description": "When a D20 lands on a 20 for an Intelligence-related skillcheck, allow it to succeed.",
+      "effects": []
+    },
+    "dance": {
+      "name": "Dance",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Skill to become a professional dancer. Grants knowledge of Choreography. [+1 Performance]",
+      "effects": []
+    },
+    "demolitions": {
+      "name": "Demolitions",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Knowledgeable in explosives and their best uses. Grants knowledge of Demolitions. [+1 Crafting]",
+      "effects": []
+    },
+    "driving": {
+      "name": "Driving",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Pilot vehicles like cars, trucks, tanks, and hovercraft. Grants knowledge of Driving. [+1 Driving]",
+      "effects": []
+    },
+    "motorcycles": {
+      "name": "Motorcycles",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Operate motorcycles, cyberbikes, and other two and three-wheeled vehicles. Grants knowledge of Motorcycles. [+1 Driving]",
+      "effects": []
+    },
+    "heavy_machinery": {
+      "name": "Heavy Machinery",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "++",
+      "description": "Operate watercraft, tractors, tanks, and construction equipment. Grants knowledge of Heavy Machinery. [+2 Driving]",
+      "effects": []
+    },
+    "piloting": {
+      "name": "Piloting",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "++",
+      "description": "Control aircraft. Grants knowledge of Aircraft. [+2 Driving]",
+      "effects": []
+    },
+    "health_education": {
+      "name": "Health Education",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Clinically diagnose symptoms and medical problems. Grants knowledge of Health. [+1 Crafting]",
+      "effects": []
+    },
+    "basic_education": {
+      "name": "Basic Education",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "++",
+      "description": "Basic public school education. Grants knowledge of General Education. [+1 Body, +1 Willpower, +1 Cool, +1 Intelligence, +1 Technical Ability]",
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "attributes.body",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        },
+        {
+          "kind": "stat",
+          "target": "attributes.willpower",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        },
+        {
+          "kind": "stat",
+          "target": "attributes.cool",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        },
+        {
+          "kind": "stat",
+          "target": "attributes.intelligence",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        },
+        {
+          "kind": "stat",
+          "target": "attributes.technical",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
+    },
+    "basic_tech": {
+      "name": "Basic Tech",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Build or repair simple mechanical and electrical devices. Grants knowledge of Technology. [+1 Evasion]",
+      "effects": []
+    },
+    "cyberdeck_design": {
+      "name": "Cyberdeck Design",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Design Cyberdecks. Grants knowledge of Cyberdeck Design. [+1 Crafting]",
+      "effects": []
+    },
+    "cybertech": {
+      "name": "CyberTech",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Repair and maintain cyberwear. Grants knowledge of CyberTech. [+1 Crafting]",
+      "effects": []
+    },
+    "electronics": {
+      "name": "Electronics",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Maintain, repair, and modify electronic instruments. Grants knowledge of Electronics. [+1 Crafting]",
+      "effects": []
+    },
+    "electronic_security": {
+      "name": "Electronic Security",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Install or counter electronic eyes, locks, bugs, tracers, and security systems. Grants knowledge of Electronic Security. [+1 Crafting]",
+      "effects": []
+    },
+    "gambling": {
+      "name": "Gambling",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Make bets, figure odds, and play games of chance. Grants knowledge of Gambling. [+1 Luck]",
+      "effects": []
+    },
+    "geology": {
+      "name": "Geology",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Knowledge of rocks, minerals, and geological structures. Grants knowledge of Geology. [+1 Crafting]",
+      "effects": []
+    },
+    "hiding_evading": {
+      "name": "Hiding/ Evading",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Lose pursuers, cover tracks, and evade people on your trail. [+1 Evasion]",
+      "effects": []
+    },
+    "history": {
+      "name": "History",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Knowledge of facts and figures of past events. Grants knowledge of History. [+1 Persuasion]",
+      "effects": []
+    },
+    "language": {
+      "name": "Language",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Speak one language (English, German, Swedish, Japanese, Korean, Micronesian, Hawaiian, French, Italian, Portuguese, Spanish, Latin, Mandarin, Russian). [+1 Persuasion]",
+      "effects": []
+    },
+    "researcher": {
+      "name": "Researcher",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Use databases and understand statistics. [+1 Crafting or Persuasion]",
+      "effects": []
+    },
+    "mathematics": {
+      "name": "Mathematics",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Understand calculations and mathematical formulas. Grants knowledge of Mathematics. [+1 Crafting]",
+      "effects": []
+    },
+    "physics": {
+      "name": "Physics",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Calculate physical principles like gas pressures and mechanical energies. Grants knowledge of Physics. [+1 Crafting]",
+      "effects": []
+    },
+    "photography": {
+      "name": "Photography",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Produce professional-caliber photographs or motion pictures. Grants knowledge of Photography. [+1 Appeal]",
+      "effects": []
+    },
+    "programming": {
+      "name": "Programming",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Write programs and re-program computer systems. Grants knowledge of Programming. [+1 Crafting]",
+      "effects": []
+    },
+    "hunting": {
+      "name": "Hunting",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Shadow and follow people. Grants knowledge of Hunting. [+1 Perception]",
+      "effects": []
+    },
+    "stock_market": {
+      "name": "Stock Market",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Know how to turn up financial profit. Double money yield or money loss on Session Start Rolls.",
+      "effects": []
+    },
+    "system_knowledge": {
+      "name": "System Knowledge",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Knowledge of the Net and its history. Grants knowledge of Net. [+1 Evasion]",
+      "effects": []
+    },
+    "survival_knowledge": {
+      "name": "Survival Knowledge",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Know how to survive in the wilds. Grants knowledge of Survival. [+1 Luck]",
+      "effects": []
+    },
+    "weaponsmith": {
+      "name": "Weaponsmith",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Repair and maintain weapons of all types. [+1 Crafting]",
+      "effects": []
+    },
+    "ranged_weaponsmith": {
+      "name": "Ranged Weaponsmith",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Create ranged weapons. [+1 Crafting]",
+      "effects": []
+    },
+    "melee_weaponsmith": {
+      "name": "Melee Weaponsmith",
+      "type": "skill",
+      "categoryId": "int_tech_skill",
+      "cost": "+",
+      "description": "Create melee weapons. [+1 Crafting]",
+      "effects": []
+    },
+    "athletics": {
+      "name": "Athletics",
+      "type": "tag",
+      "categoryId": "reflex",
+      "cost": "+",
+      "description": "Skill for throwing, climbing, and balancing. (+1 Luck)",
+      "effects": []
+    },
+    "brawling": {
+      "name": "Brawling",
+      "type": "tag",
+      "categoryId": "reflex",
+      "cost": "+",
+      "description": "Fighting man to man with fist, feet, and body. +10 Reflexes for unarmed calculations.",
+      "effects": []
+    },
+    "fencing": {
+      "name": "Fencing",
+      "type": "tag",
+      "categoryId": "reflex",
+      "cost": "+",
+      "description": "Mastery of swords, rapiers, and monoblades. Bladed weapons gain a 15% bonus to crit damage.",
+      "effects": []
+    },
+    "heavy_weapons": {
+      "name": "Heavy Weapons",
+      "type": "tag",
+      "categoryId": "reflex",
+      "cost": "++",
+      "description": "Use grenade launchers, autocannon, mortars, heavy machine guns, missiles, and rocket launchers. Heavy weapons are always critical hits.",
+      "effects": []
+    },
+    "melee_training": {
+      "name": "Melee Training",
+      "type": "tag",
+      "categoryId": "reflex",
+      "cost": "+",
+      "description": "Use melee weapons skillfully. +5% crit chance for all melee attacks.",
+      "effects": []
+    },
+    "smart_gun_specialist": {
+      "name": "Smart Gun Specialist",
+      "type": "tag",
+      "categoryId": "reflex",
+      "cost": "+",
+      "description": "Required to use gun-related cyberware. Smart Guns with Smart Link are granted 100% Accuracy with no crit rate.",
+      "effects": []
+    },
+    "sneaking": {
+      "name": "Sneaking",
+      "type": "tag",
+      "categoryId": "reflex",
+      "cost": "+",
+      "description": "Hide in shadows, move silently, evade guards. [+1 Evasion]",
+      "effects": []
+    }
+  }
 }

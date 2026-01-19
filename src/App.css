@@ -104,6 +104,13 @@ body {
   width: 100%;
 }
 
+.tags-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
 .sheet-header {
   display: flex;
   flex-direction: column;
