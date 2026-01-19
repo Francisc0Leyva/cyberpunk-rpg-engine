@@ -1,5 +1,11 @@
-import type { Character } from "../types/character";
+import type { Character, CivilAttributeKey } from "../types/character";
 import { CYBER_SYSTEMS } from "../data/cyberSystems";
+import originsData from "../data/constants/origins.json";
+import civilData from "../data/constants/civil_attributes.json";
+import {
+  getCivilTagBonusSources,
+  sumCivilBonusSources,
+} from "../lib/civilBonuses";
 import "./ReadOnlyCharacter.css";
 
 type ReadOnlyCharacterProps = {
@@ -37,6 +43,23 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
     {}
   );
 
+  const originList = (originsData as { origins: { id: string; name: string }[] })
+    .origins;
+  const originName =
+    originList.find(origin => origin.id === character.origin.id)?.name ??
+    null;
+
+  const civilAttributes = (
+    civilData as {
+      attributes: { id: CivilAttributeKey; name: string }[];
+    }
+  ).attributes;
+  const civilBonusSources = [
+    { label: "Origin", values: character.origin.allocations },
+    ...getCivilTagBonusSources(character.tags, character.tagChoices),
+  ];
+  const civilBonusTotals = sumCivilBonusSources(civilBonusSources);
+
   return (
     <div className="readonly-card">
       <h2>{character.name}</h2>
@@ -49,6 +72,37 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
               <strong>{key}:</strong> {value}
             </li>
           ))}
+        </ul>
+      </section>
+
+      <section>
+        <h3>Civil Attributes</h3>
+        <ul>
+          {civilAttributes.map(attr => {
+            const baseValue = character.civilAttributes[attr.id] ?? 0;
+            const bonusValue = civilBonusTotals[attr.id] ?? 0;
+            const total = baseValue + bonusValue;
+            const bonusLines = civilBonusSources
+              .map(source => ({
+                label: source.label,
+                value: source.values[attr.id] ?? 0,
+              }))
+              .filter(entry => Number(entry.value) !== 0)
+              .map(
+                entry =>
+                  `${entry.label} ${entry.value > 0 ? "+" : ""}${entry.value}`
+              );
+            const bonusLabel =
+              bonusLines.length > 0
+                ? ` (${bonusLines.join(", ")})`
+                : "";
+            return (
+              <li key={attr.id}>
+                <strong>{attr.name}:</strong> {total}
+                {bonusLabel}
+              </li>
+            );
+          })}
         </ul>
       </section>
 
@@ -72,6 +126,11 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
       <section>
         <h3>Tags</h3>
         <p>{activeTags.length > 0 ? activeTags.join(", ") : "None"}</p>
+      </section>
+
+      <section>
+        <h3>Origin</h3>
+        <p>{originName ?? "None"}</p>
       </section>
 
       <section>

@@ -111,6 +111,13 @@ body {
   width: 100%;
 }
 
+.origins-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
 .sheet-header {
   display: flex;
   flex-direction: column;

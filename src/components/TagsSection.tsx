@@ -1,6 +1,6 @@
 import "./TagsSection.css";
 import tagsData from "../data/constants/tags.json";
-import type { TagSelections } from "../types/character";
+import type { TagChoices, TagSelections } from "../types/character";
 
 type TagItem = {
   name: string;
@@ -8,6 +8,10 @@ type TagItem = {
   categoryId: string;
   cost: string;
   description: string;
+  choices?: Array<{
+    id: string;
+    label: string;
+  }>;
   effects?: unknown[];
 };
 
@@ -53,13 +57,17 @@ const UNCATEGORIZED_TAGS = TAG_ITEMS.filter(
 
 type TagsSectionProps = {
   selected: TagSelections;
+  choices: TagChoices;
   onToggle: (tagName: string) => void;
+  onChoiceChange: (tagName: string, choiceId: string) => void;
   onSelectInfo?: (info: string) => void;
 };
 
 export function TagsSection({
   selected,
+  choices,
   onToggle,
+  onChoiceChange,
   onSelectInfo,
 }: TagsSectionProps) {
   const totalCost = TAG_ITEMS.reduce((sum, item) => {
@@ -86,26 +94,60 @@ export function TagsSection({
           <div key={category.id} className="tag-card">
             <div className="tag-card-title">{category.name}</div>
             <div className="tag-card-list">
-              {category.items.map(item => (
-                <label key={item.id} className="tag-row">
-                  <input
-                    type="checkbox"
-                    checked={!!selected[item.name]}
-                    onChange={() => {
-                      onToggle(item.name);
-                      onSelectInfo?.(
-                        `${item.name}: ${item.description}`
-                      );
-                    }}
-                  />
-                  <div className="tag-text">
-                    <div className="tag-name">{item.name}</div>
-                    <div className="tag-description">
-                      {item.description}
-                    </div>
+              {category.items.map(item => {
+                const isSelected = Boolean(selected[item.name]);
+                const choiceId = choices[item.name] ?? "";
+                return (
+                  <div key={item.id} className="tag-row">
+                    <label className="tag-row-main">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          onToggle(item.name);
+                          onSelectInfo?.(
+                            `${item.name}: ${item.description}`
+                          );
+                        }}
+                      />
+                      <div className="tag-text">
+                        <div className="tag-name">{item.name}</div>
+                        <div className="tag-description">
+                          {item.description}
+                        </div>
+                      </div>
+                    </label>
+                    {isSelected && item.choices?.length ? (
+                      <div className="tag-choices">
+                        <div className="tag-choices-title">
+                          Choose one:
+                        </div>
+                        {item.choices.map(choice => (
+                          <label
+                            key={`${item.id}-${choice.id}`}
+                            className="tag-choice-option"
+                          >
+                            <input
+                              type="radio"
+                              name={`tag-choice-${item.id}`}
+                              checked={choiceId === choice.id}
+                              onChange={() =>
+                                onChoiceChange(item.name, choice.id)
+                              }
+                            />
+                            <span>{choice.label}</span>
+                          </label>
+                        ))}
+                        {!choiceId && (
+                          <div className="tag-choice-warning">
+                            Select a bonus to apply.
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
-                </label>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
@@ -113,26 +155,60 @@ export function TagsSection({
           <div className="tag-card">
             <div className="tag-card-title">Uncategorized</div>
             <div className="tag-card-list">
-              {UNCATEGORIZED_TAGS.map(item => (
-                <label key={item.id} className="tag-row">
-                  <input
-                    type="checkbox"
-                    checked={!!selected[item.name]}
-                    onChange={() => {
-                      onToggle(item.name);
-                      onSelectInfo?.(
-                        `${item.name}: ${item.description}`
-                      );
-                    }}
-                  />
-                  <div className="tag-text">
-                    <div className="tag-name">{item.name}</div>
-                    <div className="tag-description">
-                      {item.description}
+            {UNCATEGORIZED_TAGS.map(item => {
+              const isSelected = Boolean(selected[item.name]);
+              const choiceId = choices[item.name] ?? "";
+              return (
+                <div key={item.id} className="tag-row">
+                  <label className="tag-row-main">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {
+                        onToggle(item.name);
+                        onSelectInfo?.(
+                          `${item.name}: ${item.description}`
+                        );
+                      }}
+                    />
+                    <div className="tag-text">
+                      <div className="tag-name">{item.name}</div>
+                      <div className="tag-description">
+                        {item.description}
+                      </div>
                     </div>
-                  </div>
-                </label>
-              ))}
+                  </label>
+                  {isSelected && item.choices?.length ? (
+                    <div className="tag-choices">
+                      <div className="tag-choices-title">
+                        Choose one:
+                      </div>
+                      {item.choices.map(choice => (
+                        <label
+                          key={`${item.id}-${choice.id}`}
+                          className="tag-choice-option"
+                        >
+                          <input
+                            type="radio"
+                            name={`tag-choice-${item.id}`}
+                            checked={choiceId === choice.id}
+                            onChange={() =>
+                              onChoiceChange(item.name, choice.id)
+                            }
+                          />
+                          <span>{choice.label}</span>
+                        </label>
+                      ))}
+                      {!choiceId && (
+                        <div className="tag-choice-warning">
+                          Select a bonus to apply.
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
             </div>
           </div>
         )}

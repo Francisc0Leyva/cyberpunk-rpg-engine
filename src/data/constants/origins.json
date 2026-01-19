@@ -1,0 +1,112 @@
+{
+  "origins": [
+    {
+      "id": "corpo",
+      "name": "Corpo",
+      "description": "The higher up the corporate ladder, the less disposable someone becomes in the new world. Being someone that's not as disposable ironically makes for a larger crosshair, wherein many attempted assassinations may have taken place. This life path is for the high rollers who strive to live a boujee lifestyle.",
+      "bonusPoints": {
+        "amount": 4,
+        "spendOn": ["Appeal", "Intimidation", "Luck", "Persuasion"]
+      },
+      "grants": {
+        "tags": ["Basic Education"],
+        "choices": []
+      },
+      "recommendedFor": ["Solos", "Defiants", "Fixers", "Netrunners", "Techies"]
+    },
+    {
+      "id": "nomad",
+      "name": "Nomad",
+      "description": "Nomads live outside the main cities in abandoned lands. Their lifestyle is comparable to wolves in a pack, where the main concern is community and second to that, everything else. Their lives are often on the road, so they are always moving place to place communally, with no real home territory. Nomads are glued to their values more so than others, and this path is recommended for those from lower-class rural areas.",
+      "bonusPoints": {
+        "amount": 4,
+        "spendOn": ["Crafting", "Driving", "Evasion", "Perception"]
+      },
+      "grants": {
+        "tags": ["Driving", "Hiding/ Evading"],
+        "choices": []
+      },
+      "recommendedFor": ["Solos", "Fixers", "Netrunners", "Techies"]
+    },
+    {
+      "id": "streetkid",
+      "name": "Streetkid",
+      "description": "Born from the streets, likely in urbanity, the streetkid is not off the beaten path. Growing up with local gangs and drugs, trading braindances, and salvaging their way towards self-discovery is not an easy task. If anyone has shown resilience, it's the streetkids who made it out of the slums and have started their own lives, all feeding into the same system.",
+      "bonusPoints": {
+        "amount": 4,
+        "spendOn": ["Driving", "Evasion", "Perception", "Tolerance"]
+      },
+      "grants": {
+        "tags": ["Basic Education"],
+        "choices": []
+      },
+      "recommendedFor": ["Solos", "Fixers", "Netrunners", "Techies"]
+    },
+    {
+      "id": "beat_cop",
+      "name": "Beat Cop",
+      "description": "This origin is best suited for a character with previous warfare experience, many of which have had to undergo transformations in order to fulfill their role as a protector. Despite this, much of the time, cops are laid off after being seen as inadequate; whether it's on behalf of their mental health, physical ability, or even outdated cyberware. The unluckiest of which are those who are tasked with the role of the Psycho Squad, where many die in combat with cyberpsychos.",
+      "bonusPoints": {
+        "amount": 4,
+        "spendOn": ["Driving", "Intimidation", "Perception", "Tolerance"]
+      },
+      "grants": {
+        "tags": ["Basic Education"],
+        "choices": []
+      },
+      "recommendedFor": ["Solos", "Fixers", "Techies"]
+    },
+    {
+      "id": "joytoy",
+      "name": "Joytoy",
+      "description": "Joytoys are sex-workers who are admired almost exclusively for their bodies, sexual, or social ability. In a world where organs are of more use than ability, joytoys have to resort to making money using their sexual services. Some joytoys have different origins, with many forced to become joytoys against their wills, due to human trafficking.",
+      "bonusPoints": {
+        "amount": 4,
+        "spendOn": ["Appeal", "Persuasion", "Tolerance", "Evasion"]
+      },
+      "grants": {
+        "tags": [],
+        "choices": [
+          {
+            "choose": 1,
+            "options": ["Attractive", "Drug/Torture Tolerance"]
+          }
+        ]
+      },
+      "recommendedFor": ["Solos", "Defiants", "Netrunners", "Techies"]
+    },
+    {
+      "id": "netwerp",
+      "name": "Netwerp",
+      "description": "Architects of the Blackwall, a Netwerp is a shut-in that undergoes the task of excavating previous excerpts of the internet. Much of their time is spent exploring forums, playing video games, or experiencing their favorite braindances. Though they are frowned upon by society, due to the statistics associated with them (low birth rate, high depression, low functionality and conventional understanding of the world), they do have their purposes on the Net but don't fit in the surface-world.",
+      "bonusPoints": {
+        "amount": 4,
+        "spendOn": ["Crafting", "Evasion", "Luck", "Tolerance"]
+      },
+      "grants": {
+        "tags": ["Basic Education"],
+        "choices": []
+      },
+      "recommendedFor": ["Solos", "Defiants", "Netrunners", "Techies"]
+    },
+    {
+      "id": "parasite",
+      "name": "Parasite",
+      "description": "Products of nepotism and the won system, Parasites find themselves contributing to no other faction from pollution itself, crashing luxury cars in public areas and traveling exclusively by Aerodynes. While they are seen as the spoiled brats, they are commonly the most likely to become successful in the entertainment industries, with much of their time dedicated to performance and free-time.",
+      "bonusPoints": {
+        "amount": 4,
+        "spendOn": ["Appeal", "Intimidation", "Luck", "Performance"]
+      },
+      "grants": {
+        "tags": [],
+        "choices": [
+          {
+            "choose": 1,
+            "options": ["Social", "Debate"]
+          }
+        ]
+      },
+      "recommendedFor": ["Solos", "Fixers", "Netrunners", "Techies"]
+    }
+  ]
+}

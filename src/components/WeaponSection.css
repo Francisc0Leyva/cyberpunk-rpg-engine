@@ -47,6 +47,37 @@
   flex: 1.2;
 }
 
+.stepper-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepper-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.stepper-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.weapon-damage-input::-webkit-inner-spin-button,
+.weapon-damage-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.weapon-damage-input {
+  -moz-appearance: textfield;
+}
+
 /* Flags */
 .weapon-flags {
   display: flex;

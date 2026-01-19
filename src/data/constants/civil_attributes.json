@@ -1,0 +1,88 @@
+{
+  "attributes": [
+    {
+      "id": "reputation",
+      "name": "Reputation",
+      "description": "Impacts relations and affinity with strangers. Gain better cuts of rewards, though expectations become higher. Every 100 points increases Reputation Roll by +1.",
+      "min": -500,
+      "max": 500
+    },
+    {
+      "id": "empathy",
+      "name": "Empathy",
+      "description": "Impacts ability to work well with allies and reap better non-Eurodollar rewards. Modified by certain player actions. Helps prevent Cyber Psychosis.",
+      "min": -500,
+      "max": 500
+    },
+    {
+      "id": "appeal",
+      "name": "Appeal",
+      "description": "Base rating of how much you appeal to others.",
+      "min": -10,
+      "max": 10
+    },
+    {
+      "id": "performance",
+      "name": "Performance",
+      "description": "Skill of performing in front of others, such as singing, acting, playing an instrument, or speaking.",
+      "min": -10,
+      "max": 10
+    },
+    {
+      "id": "crafting",
+      "name": "Crafting",
+      "description": "Ability to craft items properly. Knowledge is required to craft certain items. Higher crafting allows for rarer and stronger items.",
+      "min": 0,
+      "max": 20
+    },
+    {
+      "id": "driving",
+      "name": "Driving",
+      "description": "Skill of driving in general.",
+      "min": 0,
+      "max": 20
+    },
+    {
+      "id": "evasion",
+      "name": "Evasion",
+      "description": "Skill of not being noticed or seen.",
+      "min": -10,
+      "max": 10
+    },
+    {
+      "id": "intimidation",
+      "name": "Intimidation",
+      "description": "Base rating of your ability to intimidate others. The floor to succeeding Intimidation checks starts at 1 unless the other party has a negative trait reducing this.",
+      "min": -10,
+      "max": 10
+    },
+    {
+      "id": "luck",
+      "name": "Luck",
+      "description": "Allows you to expend Luck to ensure a skill succeeds once per session. Can also guarantee a crit attack.",
+      "min": 0,
+      "max": 100
+    },
+    {
+      "id": "perception",
+      "name": "Perception",
+      "description": "Negates from Evasion during Evasion-related checks.",
+      "min": -10,
+      "max": 10
+    },
+    {
+      "id": "persuasion",
+      "name": "Persuasion",
+      "description": "Base rating of your ability to persuade others. The floor to succeeding Persuasion checks starts at 1 unless the other party has a negative trait reducing this.",
+      "min": -10,
+      "max": 10
+    },
+    {
+      "id": "tolerance",
+      "name": "Tolerance",
+      "description": "Ability to handle pain and the effects of drugs.",
+      "min": -10,
+      "max": 10
+    }
+  ]
+}

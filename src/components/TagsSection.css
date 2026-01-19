@@ -62,14 +62,20 @@
 
 .tag-row {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 6px;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
   font-size: 13px;
   cursor: pointer;
 }
 
-.tag-row input {
+.tag-row-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tag-row-main input {
   margin-top: 2px;
 }
 
@@ -85,4 +91,29 @@
 .tag-description {
   font-size: 12px;
   color: #9ca3af;
+}
+
+.tag-choices {
+  margin-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+.tag-choices-title {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.tag-choice-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-choice-warning {
+  color: #fca5a5;
+  font-size: 11px;
 }
