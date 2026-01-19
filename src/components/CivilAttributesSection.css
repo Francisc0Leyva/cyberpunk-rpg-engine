@@ -1,0 +1,86 @@
+.civil-attributes-block {
+  background: #111827;
+  color: #e5e7eb;
+  padding: 18px 22px;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.civil-attributes-block .block-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.civil-attribute {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.civil-attribute:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.civil-attribute-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stepper-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepper-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.stepper-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.civil-input {
+  width: 110px;
+  font-size: 15px;
+  padding: 6px 8px;
+}
+
+.civil-input::-webkit-inner-spin-button,
+.civil-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.civil-input {
+  -moz-appearance: textfield;
+}
+
+.civil-attribute-description {
+  font-size: 12px;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.civil-attribute-bonus {
+  font-size: 12px;
+  color: #93c5fd;
+}

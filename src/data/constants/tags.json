@@ -164,7 +164,15 @@
       "categoryId": "body_cool_willpower",
       "cost": "++",
       "description": "Withstand pain or hardship. Go longer without food, sleep, or water. [+2 Tolerance]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.tolerance",
+          "op": "add",
+          "value": 2,
+          "cap": 50
+        }
+      ]
     },
     "intimidating": {
       "name": "Intimidating",
@@ -172,7 +180,15 @@
       "categoryId": "body_cool_willpower",
       "cost": "++",
       "description": "Intimidate others by force of personality or physical coercion. [+2 Intimidation]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.intimidation",
+          "op": "add",
+          "value": 2,
+          "cap": 50
+        }
+      ]
     },
     "drug_torture_tolerance": {
       "name": "Drug/Torture Tolerance",
@@ -180,7 +196,15 @@
       "categoryId": "body_cool_willpower",
       "cost": "++",
       "description": "Withstand drugs or harsh pain. Cannot be drugged or black-out drunk. [+2 Tolerance]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.tolerance",
+          "op": "add",
+          "value": 2,
+          "cap": 50
+        }
+      ]
     },
     "human_perception": {
       "name": "Human Perception",
@@ -188,7 +212,15 @@
       "categoryId": "body_cool_willpower",
       "cost": "++",
       "description": "Detect lies, evasions, moods, and emotional clues from others. [+2 Perception]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.perception",
+          "op": "add",
+          "value": 2,
+          "cap": 50
+        }
+      ]
     },
     "leadership": {
       "name": "Leadership",
@@ -196,7 +228,69 @@
       "categoryId": "body_cool_willpower",
       "cost": "++",
       "description": "Lead and convince people to follow you. [+1 Persuasion, +1 Intimidation. One may be substituted for +1 Appeal]",
-      "effects": []
+      "effects": [],
+      "choices": [
+        {
+          "id": "persuasion_intimidation",
+          "label": "+1 Persuasion, +1 Intimidation",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.persuasion",
+              "op": "add",
+              "value": 1,
+              "cap": 50
+            },
+            {
+              "kind": "stat",
+              "target": "civil.intimidation",
+              "op": "add",
+              "value": 1,
+              "cap": 50
+            }
+          ]
+        },
+        {
+          "id": "appeal_intimidation",
+          "label": "+1 Appeal, +1 Intimidation",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.appeal",
+              "op": "add",
+              "value": 1,
+              "cap": 50
+            },
+            {
+              "kind": "stat",
+              "target": "civil.intimidation",
+              "op": "add",
+              "value": 1,
+              "cap": 50
+            }
+          ]
+        },
+        {
+          "id": "appeal_persuasion",
+          "label": "+1 Appeal, +1 Persuasion",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.appeal",
+              "op": "add",
+              "value": 1,
+              "cap": 50
+            },
+            {
+              "kind": "stat",
+              "target": "civil.persuasion",
+              "op": "add",
+              "value": 1,
+              "cap": 50
+            }
+          ]
+        }
+      ]
     },
     "social": {
       "name": "Social",
@@ -204,7 +298,35 @@
       "categoryId": "body_cool_willpower",
       "cost": "++",
       "description": "Deal with social situations. [+2 Persuasion or +2 Appeal]",
-      "effects": []
+      "effects": [],
+      "choices": [
+        {
+          "id": "persuasion",
+          "label": "+2 Persuasion",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.persuasion",
+              "op": "add",
+              "value": 2,
+              "cap": 50
+            }
+          ]
+        },
+        {
+          "id": "appeal",
+          "label": "+2 Appeal",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.appeal",
+              "op": "add",
+              "value": 2,
+              "cap": 50
+            }
+          ]
+        }
+      ]
     },
     "debate": {
       "name": "Debate",
@@ -212,7 +334,35 @@
       "categoryId": "body_cool_willpower",
       "cost": "++",
       "description": "Convince others to see your viewpoint. [+2 Intimidation or Persuasion]",
-      "effects": []
+      "effects": [],
+      "choices": [
+        {
+          "id": "intimidation",
+          "label": "+2 Intimidation",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.intimidation",
+              "op": "add",
+              "value": 2,
+              "cap": 50
+            }
+          ]
+        },
+        {
+          "id": "persuasion",
+          "label": "+2 Persuasion",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.persuasion",
+              "op": "add",
+              "value": 2,
+              "cap": 50
+            }
+          ]
+        }
+      ]
     },
     "pick_pocket": {
       "name": "Pick Pocket",
@@ -220,7 +370,22 @@
       "categoryId": "body_cool_willpower",
       "cost": "++",
       "description": "Pick pockets or shoplift unnoticed. [+1 Perception, +1 Evasion]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.perception",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        },
+        {
+          "kind": "stat",
+          "target": "civil.evasion",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "anthropology_expertise": {
       "name": "Anthropology Expertise",
@@ -228,7 +393,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Knowledge of human cultures, habits, and customs. Grants knowledge of Anthropology. [+1 Luck]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.luck",
+          "op": "add",
+          "value": 1,
+          "cap": 100
+        }
+      ]
     },
     "artificial_intelligence_expertise": {
       "name": "Artificial Intelligence Expertise",
@@ -252,7 +425,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Knowledge of animals, plants, and biological systems. Grants knowledge of Biology. [+1 Persuasion]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.persuasion",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "botany": {
       "name": "Botany",
@@ -260,7 +441,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Knowledge of plants and identification. Grants knowledge of Botany. [+1 Tolerance]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.tolerance",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "chemistry": {
       "name": "Chemistry",
@@ -268,7 +457,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Skill for mixing chemicals and creating compounds. Grants knowledge of Chemistry. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "composition": {
       "name": "Composition",
@@ -276,7 +473,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Skill for writing songs, articles, or stories. Grants knowledge of Writing. [+1 Performance]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.performance",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "clever": {
       "name": "Clever",
@@ -292,7 +497,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Skill to become a professional dancer. Grants knowledge of Choreography. [+1 Performance]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.performance",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "demolitions": {
       "name": "Demolitions",
@@ -300,7 +513,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Knowledgeable in explosives and their best uses. Grants knowledge of Demolitions. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "driving": {
       "name": "Driving",
@@ -308,7 +529,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Pilot vehicles like cars, trucks, tanks, and hovercraft. Grants knowledge of Driving. [+1 Driving]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.driving",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "motorcycles": {
       "name": "Motorcycles",
@@ -316,7 +545,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Operate motorcycles, cyberbikes, and other two and three-wheeled vehicles. Grants knowledge of Motorcycles. [+1 Driving]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.driving",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "heavy_machinery": {
       "name": "Heavy Machinery",
@@ -324,7 +561,15 @@
       "categoryId": "int_tech_skill",
       "cost": "++",
       "description": "Operate watercraft, tractors, tanks, and construction equipment. Grants knowledge of Heavy Machinery. [+2 Driving]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.driving",
+          "op": "add",
+          "value": 2,
+          "cap": 50
+        }
+      ]
     },
     "piloting": {
       "name": "Piloting",
@@ -332,7 +577,15 @@
       "categoryId": "int_tech_skill",
       "cost": "++",
       "description": "Control aircraft. Grants knowledge of Aircraft. [+2 Driving]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.driving",
+          "op": "add",
+          "value": 2,
+          "cap": 50
+        }
+      ]
     },
     "health_education": {
       "name": "Health Education",
@@ -340,7 +593,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Clinically diagnose symptoms and medical problems. Grants knowledge of Health. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "basic_education": {
       "name": "Basic Education",
@@ -392,7 +653,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Build or repair simple mechanical and electrical devices. Grants knowledge of Technology. [+1 Evasion]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.evasion",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "cyberdeck_design": {
       "name": "Cyberdeck Design",
@@ -400,7 +669,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Design Cyberdecks. Grants knowledge of Cyberdeck Design. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "cybertech": {
       "name": "CyberTech",
@@ -408,7 +685,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Repair and maintain cyberwear. Grants knowledge of CyberTech. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "electronics": {
       "name": "Electronics",
@@ -416,7 +701,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Maintain, repair, and modify electronic instruments. Grants knowledge of Electronics. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "electronic_security": {
       "name": "Electronic Security",
@@ -424,7 +717,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Install or counter electronic eyes, locks, bugs, tracers, and security systems. Grants knowledge of Electronic Security. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "gambling": {
       "name": "Gambling",
@@ -432,7 +733,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Make bets, figure odds, and play games of chance. Grants knowledge of Gambling. [+1 Luck]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.luck",
+          "op": "add",
+          "value": 1,
+          "cap": 100
+        }
+      ]
     },
     "geology": {
       "name": "Geology",
@@ -440,7 +749,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Knowledge of rocks, minerals, and geological structures. Grants knowledge of Geology. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "hiding_evading": {
       "name": "Hiding/ Evading",
@@ -448,7 +765,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Lose pursuers, cover tracks, and evade people on your trail. [+1 Evasion]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.evasion",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "history": {
       "name": "History",
@@ -456,7 +781,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Knowledge of facts and figures of past events. Grants knowledge of History. [+1 Persuasion]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.persuasion",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "language": {
       "name": "Language",
@@ -464,7 +797,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Speak one language (English, German, Swedish, Japanese, Korean, Micronesian, Hawaiian, French, Italian, Portuguese, Spanish, Latin, Mandarin, Russian). [+1 Persuasion]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.persuasion",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "researcher": {
       "name": "Researcher",
@@ -472,7 +813,35 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Use databases and understand statistics. [+1 Crafting or Persuasion]",
-      "effects": []
+      "effects": [],
+      "choices": [
+        {
+          "id": "crafting",
+          "label": "+1 Crafting",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.crafting",
+              "op": "add",
+              "value": 1,
+              "cap": 50
+            }
+          ]
+        },
+        {
+          "id": "persuasion",
+          "label": "+1 Persuasion",
+          "effects": [
+            {
+              "kind": "stat",
+              "target": "civil.persuasion",
+              "op": "add",
+              "value": 1,
+              "cap": 50
+            }
+          ]
+        }
+      ]
     },
     "mathematics": {
       "name": "Mathematics",
@@ -480,7 +849,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Understand calculations and mathematical formulas. Grants knowledge of Mathematics. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "physics": {
       "name": "Physics",
@@ -488,7 +865,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Calculate physical principles like gas pressures and mechanical energies. Grants knowledge of Physics. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "photography": {
       "name": "Photography",
@@ -496,7 +881,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Produce professional-caliber photographs or motion pictures. Grants knowledge of Photography. [+1 Appeal]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.appeal",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "programming": {
       "name": "Programming",
@@ -504,7 +897,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Write programs and re-program computer systems. Grants knowledge of Programming. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "hunting": {
       "name": "Hunting",
@@ -512,7 +913,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Shadow and follow people. Grants knowledge of Hunting. [+1 Perception]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.perception",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "stock_market": {
       "name": "Stock Market",
@@ -528,7 +937,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Knowledge of the Net and its history. Grants knowledge of Net. [+1 Evasion]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.evasion",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "survival_knowledge": {
       "name": "Survival Knowledge",
@@ -536,7 +953,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Know how to survive in the wilds. Grants knowledge of Survival. [+1 Luck]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.luck",
+          "op": "add",
+          "value": 1,
+          "cap": 100
+        }
+      ]
     },
     "weaponsmith": {
       "name": "Weaponsmith",
@@ -544,7 +969,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Repair and maintain weapons of all types. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "ranged_weaponsmith": {
       "name": "Ranged Weaponsmith",
@@ -552,7 +985,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Create ranged weapons. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "melee_weaponsmith": {
       "name": "Melee Weaponsmith",
@@ -560,7 +1001,15 @@
       "categoryId": "int_tech_skill",
       "cost": "+",
       "description": "Create melee weapons. [+1 Crafting]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.crafting",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     },
     "athletics": {
       "name": "Athletics",
@@ -568,7 +1017,15 @@
       "categoryId": "reflex",
       "cost": "+",
       "description": "Skill for throwing, climbing, and balancing. (+1 Luck)",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.luck",
+          "op": "add",
+          "value": 1,
+          "cap": 100
+        }
+      ]
     },
     "brawling": {
       "name": "Brawling",
@@ -616,7 +1073,15 @@
       "categoryId": "reflex",
       "cost": "+",
       "description": "Hide in shadows, move silently, evade guards. [+1 Evasion]",
-      "effects": []
+      "effects": [
+        {
+          "kind": "stat",
+          "target": "civil.evasion",
+          "op": "add",
+          "value": 1,
+          "cap": 50
+        }
+      ]
     }
   }
 }

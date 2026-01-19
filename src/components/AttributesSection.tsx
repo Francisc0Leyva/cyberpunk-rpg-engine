@@ -44,6 +44,16 @@ export function AttributesSection({
     );
   }, [attributes]);
 
+  function clamp(value: number) {
+    return Math.max(10, Math.min(50, value));
+  }
+
+  function getCurrentValue(key: AttributeKey) {
+    const n = Number(drafts[key]);
+    if (Number.isFinite(n)) return n;
+    return Number(attributes[key] ?? 10);
+  }
+
   function updateAttr(key: AttributeKey, value: string) {
     setDrafts(prev => ({
       ...prev,
@@ -63,7 +73,7 @@ export function AttributesSection({
   function commitAttr(key: AttributeKey) {
     const n = Number(drafts[key]);
     const safe = Number.isFinite(n) ? n : attributes[key];
-    const clamped = Math.max(10, Math.min(50, safe));
+    const clamped = clamp(safe);
 
     setDrafts(prev => ({
       ...prev,
@@ -78,6 +88,13 @@ export function AttributesSection({
     }
   }
 
+  function stepAttr(key: AttributeKey, delta: number) {
+    if (locked) return;
+    const current = getCurrentValue(key);
+    const next = clamp(current + delta);
+    updateAttr(key, String(next));
+  }
+
   return (
     <div className="block attributes-block">
       <div className="block-title">Attributes</div>
@@ -85,16 +102,34 @@ export function AttributesSection({
       {attributeList.map(([label, key]) => (
         <div className="field-row" key={key}>
           <label className="label">{label}:</label>
-          <input
-            className="input small-input"
-            type="number"
-            min={10}
-            max={50}
-            value={drafts[key]}
-            disabled={locked}
-            onChange={(e) => updateAttr(key, e.target.value)}
-            onBlur={() => commitAttr(key)}
-          />
+          <div className="stepper-controls">
+            <button
+              className="stepper-button"
+              type="button"
+              onClick={() => stepAttr(key, -1)}
+              disabled={locked || getCurrentValue(key) <= 10}
+            >
+              -
+            </button>
+            <input
+              className="input small-input"
+              type="number"
+              min={10}
+              max={50}
+              value={drafts[key]}
+              disabled={locked}
+              onChange={(e) => updateAttr(key, e.target.value)}
+              onBlur={() => commitAttr(key)}
+            />
+            <button
+              className="stepper-button"
+              type="button"
+              onClick={() => stepAttr(key, 1)}
+              disabled={locked || getCurrentValue(key) >= 50}
+            >
+              +
+            </button>
+          </div>
         </div>
       ))}
 

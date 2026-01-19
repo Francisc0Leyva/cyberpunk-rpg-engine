@@ -88,6 +88,12 @@ export function WeaponSection({
     updateWeapon({ damage: Math.max(0, Math.min(1000, value)) });
   }
 
+  function stepDamage(delta: number) {
+    if (isUnarmed) return;
+    const next = Math.max(0, Math.min(1000, weapon.damage + delta));
+    updateWeapon({ damage: next });
+  }
+
   function handleTypeChange(nextType: WeaponType) {
     updateWeapon({
       type: nextType,
@@ -124,15 +130,33 @@ export function WeaponSection({
       {/* Weapon Damage */}
       <div className="field-row">
         <label className="label">Weapon Damage</label>
-        <input
-          type="number"
-          min={0}
-          max={1000}
-          className="input small-input"
-          value={weapon.damage}
-          onChange={handleDamageChange}
-          disabled={isUnarmed}
-        />
+        <div className="stepper-controls">
+          <button
+            className="stepper-button"
+            type="button"
+            onClick={() => stepDamage(-1)}
+            disabled={isUnarmed || weapon.damage <= 0}
+          >
+            -
+          </button>
+          <input
+            type="number"
+            min={0}
+            max={1000}
+            className="input small-input weapon-damage-input"
+            value={weapon.damage}
+            onChange={handleDamageChange}
+            disabled={isUnarmed}
+          />
+          <button
+            className="stepper-button"
+            type="button"
+            onClick={() => stepDamage(1)}
+            disabled={isUnarmed || weapon.damage >= 1000}
+          >
+            +
+          </button>
+        </div>
       </div>
 
       {/* Flags */}

@@ -23,8 +23,33 @@
   padding: 8px 10px;
 }
 
+.stepper-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepper-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.stepper-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .attributes-block input[type="number"]::-webkit-inner-spin-button,
 .attributes-block input[type="number"]::-webkit-outer-spin-button {
-  transform: scale(1.3);
-  margin-left: 4px;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.attributes-block input[type="number"] {
+  -moz-appearance: textfield;
 }
