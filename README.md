@@ -1,73 +1,42 @@
-# React + TypeScript + Vite
+# Cyberpunk 2079 Atlantix
+A web-based character builder and combat calculator for a custom Cyberpunk tabletop RPG system.
+This project is the next evolution of the original desktop calculator, rebuilt from the ground up with a modern web stack and a data-driven design philosophy.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Current Status: Sandbox Mode
 
-Currently, two official plugins are available:
+Multiplayer, DM hosting, and persistence are planned but not yet implemented.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Core principles:
 
-## React Compiler
+**Sandbox First**
+- Let players experiment without friction. Rules enforcement is a mode, not a limitation.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Data Over Logic**
+- Game content lives in JSON. The engine validates and calculates — it does not dictate outcomes.
 
-## Expanding the ESLint configuration
+**Future-Proofing**
+- Multiplayer, respecs, and balance changes should not require rewrites.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+If a designer can add new content without touching TypeScript, the system is working as intended.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Tech Stack
+**Frontend:** React + TypeScript
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+**State Management:** Local state (sandbox), designed for future sync
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Styling:** CSS / utility-based styling
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**Data:** JSON-driven game definitions
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Build Tooling:** Vite
+
+(Backend, auth, and persistence are intentionally deferred.)
+
+## Getting started
+``` bash
+git clone https://github.com/Francisc0Leyva/cyberpunk-rpg-engine.git
+cd cyberpunk-rpg-web
+npm install
+npm run dev
 ```
