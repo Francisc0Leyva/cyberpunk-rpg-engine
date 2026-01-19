@@ -67,7 +67,7 @@ export function CharacterSheet() {
     "Select an item to view its description."
   );
   const [activeTab, setActiveTab] = useState<
-    "edit" | "summary" | "cybermods"
+    "edit" | "summary" | "cybermods" | "tags"
   >("edit");
 
   function setAttributes(next: Attributes) {
@@ -150,6 +150,14 @@ export function CharacterSheet() {
         >
           Cyber Mods
         </button>
+        <button
+          className={`tab-button ${
+            activeTab === "tags" ? "active" : ""
+          }`}
+          onClick={() => setActiveTab("tags")}
+        >
+          Tags
+        </button>
       </div>
 
       {activeTab === "edit" ? (
@@ -172,11 +180,6 @@ export function CharacterSheet() {
               <AttributesSection
                 attributes={character.attributes}
                 onChange={setAttributes}
-              />
-              <TagsSection
-                selected={character.tags}
-                onToggle={toggleTag}
-                onSelectInfo={handleSelectionInfo}
               />
               <StatusEffectsSection
                 selected={character.statusEffects}
@@ -205,7 +208,7 @@ export function CharacterSheet() {
         <div className="read-only-container">
           <ReadOnlyCharacter character={character} />
         </div>
-      ) : (
+      ) : activeTab === "cybermods" ? (
         <div className="cybermods-tab">
           <CyberModsSection
             selections={character.cyberMods}
@@ -213,6 +216,14 @@ export function CharacterSheet() {
             onSelectInfo={handleSelectionInfo}
           />
           <CyberModsOverview selections={character.cyberMods} />
+        </div>
+      ) : (
+        <div className="tags-tab">
+          <TagsSection
+            selected={character.tags}
+            onToggle={toggleTag}
+            onSelectInfo={handleSelectionInfo}
+          />
         </div>
       )}
     </div>
