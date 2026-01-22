@@ -5,7 +5,10 @@
   border-radius: 8px;
   color: #f4f4f4;
   overflow-y: auto;
-  flex: 1;
+  flex: 0 1 900px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
   min-width: 320px;
 
 

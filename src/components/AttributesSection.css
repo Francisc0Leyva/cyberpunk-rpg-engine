@@ -23,6 +23,34 @@
   padding: 8px 10px;
 }
 
+.attribute-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attribute-points-summary {
+  font-size: 12px;
+  color: #cbd5f5;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attribute-points-count {
+  font-weight: 600;
+}
+
+.attribute-points-note {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.attribute-points-empty {
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .stepper-controls {
   display: flex;
   align-items: center;
@@ -52,4 +80,15 @@
 
 .attributes-block input[type="number"] {
   -moz-appearance: textfield;
+}
+
+.attributes-block .checkbox-row {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.attribute-bonus {
+  font-size: 11px;
+  color: #9ca3af;
+  padding-left: 2px;
 }

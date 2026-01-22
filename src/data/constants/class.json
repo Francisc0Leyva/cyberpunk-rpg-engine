@@ -1,0 +1,190 @@
+{
+  "classes": [
+    {
+      "id": "solo",
+      "name": "Solo",
+      "description": "War-torn and recycled, these warriors come from the bloodiest battles, serving as mercenaries or soldiers in warfare, losing much of their humanity in the process. As a result of this, many trauma-ridden survivors that make it back to civilization can only find careers in combat, such as becoming hitmen or assassins. Others take a more noble path and become police officers. Most are machine, replacing their lost organic tissue, whether purposeful or not, with modern technology to enhance their combative abilities.",
+      "ability": {
+        "name": "One-Man Army",
+        "description": "Allows for the player to equip up to six cybermods without any Cyberpsychosis checks. They also gain the ability to {Combobulate}, allowing them to reroll a cybermod's installation to gain a more favorable outcome, once per cybermod installation."
+      },
+      "attributePoints": "60 + 1D15",
+      "civilAbilities": [
+        "Appeal: -5 + 1D6",
+        "Performance: 0",
+        "Crafting: 0",
+        "Driving: 0",
+        "Perception: 6",
+        "Evasion: 0",
+        "Luck: 0",
+        "Tolerance: 6",
+        "Intimidation: 2D2",
+        "Persuasion: 0"
+      ],
+      "cybermods": [
+        "[Operating System Choice] + 3 randomized choices d10, 2 choices d10."
+      ],
+      "tagPoints": "3D5",
+      "bonuses": [
+        "+1 Tag towards Reflexes allocation",
+        "+1 Tag towards Martial Art allocation"
+      ],
+      "choices": [
+        "Choose between [Strength Training] or [Interrogation Expert]."
+      ]
+    },
+    {
+      "id": "fixer",
+      "name": "Fixer",
+      "description": "Well aware of the underground crime taking place in the world, Fixers are known to deal in smuggling, brokerage, organize jobs, and make deals criminal organizations and gangs. They know shady business better than anyone, and have connections that commonfolk could only dream of.",
+      "ability": {
+        "name": "Negotiator",
+        "description": "Get a large discount when buying from vendors. Allows for rewards to be rerolled one time per session. Grants the ability to {Leverage}, allowing the user to roll a D20 to request backup once per session."
+      },
+      "attributePoints": "60 + 4D3",
+      "civilAbilities": [
+        "Appeal: 0",
+        "Performance: 0",
+        "Crafting: 0",
+        "Driving: 2",
+        "Perception: 4",
+        "Evasion: 2",
+        "Luck: 3",
+        "Tolerance: 4",
+        "Intimidation: 2D2",
+        "Persuasion: 2D2"
+      ],
+      "cybermods": [
+        "[Operating System Choice] + one choice d10 + Choose one Cybermod."
+      ],
+      "tagPoints": "3D5",
+      "bonuses": [
+        "+1 Tag towards Reflexes allocation",
+        "+1 Tag towards Martial Art allocation"
+      ],
+      "choices": [
+        "Choose between [Strength Training] or [Interrogation Expert].",
+        "Choose between [Swimmer] or [Aware]."
+      ]
+    },
+    {
+      "id": "netrunner",
+      "name": "Netrunner",
+      "description": "Talented with a knack for cheating the system, the Netrunner never feels at home in the new world necessarily, though when they are in the Net, they are undefeatable, navigating the harsh waters of technoreality. With a talent for uncovering the forbidden, the Netrunner is known for their ability to hack their way through virtual difficulties. With an ever-growing worry for the progression of Artificial Intelligence, the Netrunner is no stranger to risk.",
+      "ability": {
+        "name": "Bypasser",
+        "description": "Gain the ability to infiltrate defenses, otherwise considered impassible. Grants the ability to {Hack} allies or enemies in battle, sacrificing one turn, but ensuring the success of a quickhack. Additionally, gain the ability to {Netrun} outside of combat."
+      },
+      "attributePoints": "60 + (1D15 or +10 INT)",
+      "civilAbilities": [
+        "Appeal: 0",
+        "Performance: 0",
+        "Crafting: 0",
+        "Driving: 0",
+        "Perception: 6",
+        "Evasion: 1D4",
+        "Luck: 0",
+        "Tolerance: 0",
+        "Intimidation: 0",
+        "Persuasion: 0"
+      ],
+      "cybermods": [
+        "[Scrubbed Cyberdeck] + two choices, d10."
+      ],
+      "tagPoints": "3D5",
+      "bonuses": [
+        "+1 Intelligence Tag",
+        "+2 Quickhacks",
+        "+2 Extra RAM"
+      ]
+    },
+    {
+      "id": "techie",
+      "name": "Techie",
+      "description": "A gearhead of the new world who enjoys conceptualizing assembly. These reliable engineers are vital to the survival of many, and as a result do not suffer much with finances. While not as reliable in combat, they do not really have much of a need for combat when they can create robots to fight for them, or rely on their bodyguards to do the beatings.",
+      "ability": {
+        "name": "Ripperdoc",
+        "description": "Gain the ability to {Construct} things and find components. Gain the ability to {Install} Cybermods, granting a bonus towards preventing Cyber Psychosis based on Crafting level. Can attempt to {Improve} or {Repair} equipment, cybermods, or weapons. Requires knowledge. Increases the Crafting cap by 10. Allows one reroll for Cyberpsychosis, if you choose."
+      },
+      "attributePoints": "60",
+      "civilAbilities": [
+        "Appeal: 0",
+        "Performance: 0",
+        "Crafting: A",
+        "Driving: A",
+        "Perception: 0",
+        "Evasion: 0",
+        "Luck: 0",
+        "Tolerance: 0",
+        "Intimidation: 0",
+        "Persuasion: 0"
+      ],
+      "civilNotes": [
+        "A: Roll 2D4 and allocate accordingly between these two stats. Otherwise, record 0."
+      ],
+      "cybermods": [
+        "Scrubbed Cyberdeck + [Choose 2 Cybermods]"
+      ],
+      "tagPoints": "4D4",
+      "bonuses": [
+        "+3 Intelligence Tags",
+        "+2 Reflex Tags"
+      ],
+      "choices": [
+        "Gain [Basic Education] or two INT tags."
+      ]
+    },
+    {
+      "id": "defiant",
+      "name": "Defiant",
+      "description": "Rebellious to the ways of the new world, a Defiant is focused on the impact they can have. They have an orientation that hones them in on the humane, rather than the progressiveness of the new world.",
+      "attributePoints": "60 + 3D5",
+      "civilAbilities": [
+        "Appeal: A",
+        "Performance: A",
+        "Crafting: 0",
+        "Driving: 0",
+        "Perception: 3",
+        "Evasion: 0",
+        "Luck: 1",
+        "Tolerance: 2",
+        "Intimidation: B",
+        "Persuasion: B"
+      ],
+      "civilNotes": [
+        "A: If Rockerboy, roll 1D4 and allocate accordingly between these two stats. Otherwise, record 0.",
+        "B: Roll 1D4 and allocate accordingly between these two stats. If Media or Whistleblower, roll an additional 1D4."
+      ],
+      "cybermods": [
+        "[Choose Operating System] + 1 chosen Cybermod."
+      ],
+      "tagPoints": "5D5",
+      "subclasses": [
+        {
+          "name": "Media",
+          "description": "These people report the news and the horrifying reality of the shady dealings of corporations. Medias are known to have crosshairs on their back for this reason. These masters of media can singlehandedly devastate and inspire action against authority.",
+          "ability": {
+            "name": "Dead Man's Switch",
+            "description": "Gain the ability to utilize Intimidation, Persuasion, or Performance interchangeably. Additionally, may reroll an action of this nature once if it threatens the life of the user, once per session."
+          }
+        },
+        {
+          "name": "Whistleblower",
+          "description": "These people hold high roles within companies, though have different plans than their overlords. With their hiatus, their goal is to bring down companies and organizations from the inside - at the risk of their own lives.",
+          "ability": {
+            "name": "Dead Man's Switch",
+            "description": "Gain the ability to utilize Intimidation, Persuasion, or Performance interchangeably. Additionally, may reroll an action of this nature once if it threatens the life of the user, once per session."
+          }
+        },
+        {
+          "name": "Rockerboy",
+          "description": "These people are rebels who defy the modern world, focusing on their missions in art and messages. They are catalysts of empathy and justice, even if that means justifying things by their own means.",
+          "ability": {
+            "name": "Inspire",
+            "description": "Gain the ability to {Inspire} another entity one time, per session. This allows the user to roll on behalf of another entity if it fails a skill check. Additionally, if the roll succeeds, it will be guaranteed to crit, if possible."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -78,6 +78,17 @@
   -moz-appearance: textfield;
 }
 
+.weapon-damage-input:disabled,
+.weapon-damage-input.weapon-damage-disabled {
+  background: #0b1220;
+  color: #6b7280;
+  border-color: #374151;
+}
+
+.weapon-damage-row.disabled {
+  opacity: 0.6;
+}
+
 /* Flags */
 .weapon-flags {
   display: flex;

@@ -387,6 +387,30 @@
         }
       ]
     },
+    "strength_training": {
+      "name": "Strength Training",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "+",
+      "description": "Physical conditioning and strength training. Required for Thai Kick Boxing.",
+      "effects": []
+    },
+    "interrogation_expert": {
+      "name": "Interrogation Expert",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "+",
+      "description": "Skilled at extracting information through questioning.",
+      "effects": []
+    },
+    "swimmer": {
+      "name": "Swimmer",
+      "type": "trait",
+      "categoryId": "body_cool_willpower",
+      "cost": "+",
+      "description": "Comfortable in water and trained in swimming.",
+      "effects": []
+    },
     "anthropology_expertise": {
       "name": "Anthropology Expertise",
       "type": "skill",

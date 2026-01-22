@@ -17,9 +17,21 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
+.tags-summary-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .tags-title {
   font-size: 18px;
   font-weight: 600;
+}
+
+.tags-selected {
+  font-size: 12px;
+  font-style: italic;
+  color: #cbd5f5;
 }
 
 .tags-cost {
@@ -27,11 +39,55 @@
   color: #e2e8f0;
 }
 
+.tags-class-roll {
+  font-size: 12px;
+  color: #cbd5f5;
+  font-style: italic;
+}
+
 .tags-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
   width: 100%;
+}
+
+.origin-bonus-card {
+  background: #0b1220;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.origin-bonus-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.origin-bonus-text {
+  font-size: 12px;
+  color: #cbd5f5;
+  margin-bottom: 6px;
+}
+
+.origin-bonus-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+.origin-bonus-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
 }
 
 .tag-card {
@@ -51,6 +107,12 @@
   font-weight: 600;
 }
 
+.tag-card-free {
+  font-size: 12px;
+  color: #93c5fd;
+  font-style: italic;
+}
+
 .tag-card-list {
   display: flex;
   flex-direction: column;
@@ -67,6 +129,11 @@
   margin-bottom: 10px;
   font-size: 13px;
   cursor: pointer;
+}
+
+.tag-row-locked {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .tag-row-main {
@@ -116,4 +183,10 @@
 .tag-choice-warning {
   color: #fca5a5;
   font-size: 11px;
+}
+
+.tag-choice-lock {
+  color: #9ca3af;
+  font-size: 11px;
+  font-style: italic;
 }
