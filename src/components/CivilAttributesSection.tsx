@@ -46,12 +46,14 @@ function getTotal(
 type CivilAttributesSectionProps = {
   attributes: CivilAttributes;
   bonusSources?: CivilBonusSource[];
+  rollNotes?: Partial<Record<CivilAttributeKey, string>>;
   onChange: (next: CivilAttributes) => void;
 };
 
 export function CivilAttributesSection({
   attributes,
   bonusSources = DEFAULT_SOURCES,
+  rollNotes = {},
   onChange,
 }: CivilAttributesSectionProps) {
   const bonusTotals = useMemo(
@@ -212,6 +214,11 @@ export function CivilAttributesSection({
             <div className="civil-attribute-description">
               {attr.description}
             </div>
+            {rollNotes[attr.id] ? (
+              <div className="civil-attribute-roll">
+                {rollNotes[attr.id]}
+              </div>
+            ) : null}
             {bonusLines.map(entry => (
               <div
                 key={`${attr.id}-${entry.label}`}

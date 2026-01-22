@@ -21,6 +21,18 @@ type TagCategory = {
   name: string;
 };
 
+type OriginChoice = {
+  choose: number;
+  options: string[];
+};
+
+type OriginChoiceConfig = {
+  originId: string;
+  originName: string;
+  choices: OriginChoice[];
+  selections: string[];
+};
+
 type TagsRules = {
   pointsName?: string;
   costScale?: Record<string, number>;
@@ -62,6 +74,17 @@ type TagsSectionProps = {
   onToggle: (tagName: string) => void;
   onChoiceChange: (tagName: string, choiceId: string) => void;
   onSelectInfo?: (info: string) => void;
+  classTagPoints?: {
+    expr: string;
+    total: number;
+  } | null;
+  lockedTags?: string[];
+  freeTagAllowances?: Record<string, number>;
+  originChoice?: OriginChoiceConfig | null;
+  onOriginChoiceSelect?: (
+    choiceIndex: number,
+    option: string
+  ) => void;
 };
 
 export function TagsSection({
@@ -70,7 +93,13 @@ export function TagsSection({
   onToggle,
   onChoiceChange,
   onSelectInfo,
+  classTagPoints = null,
+  lockedTags = [],
+  freeTagAllowances = {},
+  originChoice = null,
+  onOriginChoiceSelect,
 }: TagsSectionProps) {
+  const lockedSet = useMemo(() => new Set(lockedTags), [lockedTags]);
   const selectedLabels = useMemo(() => {
     const items = [...TAG_ITEMS, ...UNCATEGORIZED_TAGS];
     return items
@@ -88,14 +117,58 @@ export function TagsSection({
         return item.name;
       });
   }, [selected, choices]);
-  const totalCost = TAG_ITEMS.reduce((sum, item) => {
-    if (!selected[item.name]) return sum;
-    const cost = COST_SCALE[item.cost];
-    if (typeof cost !== "number" || !Number.isFinite(cost)) {
-      return sum;
-    }
-    return sum + cost;
-  }, 0);
+  const { totalCost, freeUsage } = useMemo(() => {
+    const byCategory = new Map<
+      string,
+      Array<{ cost: number }>
+    >();
+    TAG_ITEMS.forEach(item => {
+      if (!selected[item.name]) return;
+      if (lockedSet.has(item.name)) return;
+      const rawCost = COST_SCALE[item.cost];
+      const cost =
+        typeof rawCost === "number" && Number.isFinite(rawCost)
+          ? rawCost
+          : 0;
+      const categoryId = item.categoryId ?? "uncategorized";
+      if (!byCategory.has(categoryId)) {
+        byCategory.set(categoryId, []);
+      }
+      byCategory.get(categoryId)?.push({ cost });
+    });
+
+    let total = 0;
+    const usage: Record<
+      string,
+      { total: number; used: number; remaining: number }
+    > = {};
+
+    CATEGORY_ORDER.forEach(category => {
+      const freeTotal = freeTagAllowances[category.id] ?? 0;
+      const list = byCategory.get(category.id) ?? [];
+      list.sort((a, b) => b.cost - a.cost);
+      let used = 0;
+      list.forEach(entry => {
+        if (used < freeTotal) {
+          used += 1;
+        } else {
+          total += entry.cost;
+        }
+      });
+      usage[category.id] = {
+        total: freeTotal,
+        used,
+        remaining: Math.max(0, freeTotal - used),
+      };
+    });
+
+    const uncategorized = byCategory.get("uncategorized") ?? [];
+    uncategorized.forEach(entry => {
+      total += entry.cost;
+    });
+
+    return { totalCost: total, freeUsage: usage };
+  }, [selected, lockedSet, freeTagAllowances]);
   const pointsName = TAG_DATA.rules?.pointsName ?? "Tag Points";
 
   return (
@@ -111,24 +184,86 @@ export function TagsSection({
         </div>
         <div className="tags-cost">
           Costs {totalCost} {pointsName}
+          {classTagPoints ? (
+            <span className="tags-class-roll">
+              {" "}
+              • Class roll: {classTagPoints.expr} ={" "}
+              {classTagPoints.total}
+            </span>
+          ) : null}
         </div>
       </div>
+
+      {originChoice && originChoice.choices.length > 0 ? (
+        <div className="origin-bonus-card">
+          <div className="origin-bonus-title">
+            {originChoice.originName} origin bonus
+          </div>
+          {originChoice.choices.map((choice, idx) => {
+            const selection = originChoice.selections[idx] ?? "";
+            const optionText = choice.options.join(" or ");
+            return (
+              <div key={`${originChoice.originId}-bonus-${idx}`}>
+                <div className="origin-bonus-text">
+                  {originChoice.originName} origin bonus: select{" "}
+                  {optionText}. (Free tag)
+                </div>
+                <div className="origin-bonus-options">
+                  {choice.options.map(option => (
+                    <label
+                      key={`${originChoice.originId}-${idx}-${option}`}
+                      className="origin-bonus-option"
+                    >
+                      <input
+                        type="radio"
+                        name={`${originChoice.originId}-bonus-${idx}`}
+                        checked={selection === option}
+                        onChange={() =>
+                          onOriginChoiceSelect?.(idx, option)
+                        }
+                      />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : null}
 
       <div className="tags-grid">
         {TAGS_BY_CATEGORY.map(category => (
           <div key={category.id} className="tag-card">
             <div className="tag-card-title">{category.name}</div>
+            {freeUsage[category.id]?.total ? (
+              <div className="tag-card-free">
+                Class free tags: {freeUsage[category.id].total}
+                {freeUsage[category.id].remaining !==
+                freeUsage[category.id].total
+                  ? ` (${freeUsage[category.id].remaining} remaining)`
+                  : ""}
+              </div>
+            ) : null}
             <div className="tag-card-list">
               {category.items.map(item => {
                 const isSelected = Boolean(selected[item.name]);
+                const isLocked = lockedSet.has(item.name);
                 const choiceId = choices[item.name] ?? "";
                 return (
-                  <div key={item.id} className="tag-row">
+                  <div
+                    key={item.id}
+                    className={`tag-row ${
+                      isLocked ? "tag-row-locked" : ""
+                    }`}
+                  >
                     <label className="tag-row-main">
                       <input
                         type="checkbox"
                         checked={isSelected}
+                        disabled={isLocked}
                         onChange={() => {
+                          if (isLocked) return;
                           onToggle(item.name);
                           onSelectInfo?.(
                             `${item.name}: ${item.description}`
@@ -168,6 +303,11 @@ export function TagsSection({
                             Select a bonus to apply.
                           </div>
                         )}
+                        {isLocked && (
+                          <div className="tag-choice-lock">
+                            Locked by class or origin.
+                          </div>
+                        )}
                       </div>
                     ) : null}
                   </div>
@@ -182,14 +322,22 @@ export function TagsSection({
             <div className="tag-card-list">
             {UNCATEGORIZED_TAGS.map(item => {
               const isSelected = Boolean(selected[item.name]);
+              const isLocked = lockedSet.has(item.name);
               const choiceId = choices[item.name] ?? "";
               return (
-                <div key={item.id} className="tag-row">
+                <div
+                  key={item.id}
+                  className={`tag-row ${
+                    isLocked ? "tag-row-locked" : ""
+                  }`}
+                >
                   <label className="tag-row-main">
                     <input
                       type="checkbox"
                       checked={isSelected}
+                      disabled={isLocked}
                       onChange={() => {
+                        if (isLocked) return;
                         onToggle(item.name);
                         onSelectInfo?.(
                           `${item.name}: ${item.description}`
@@ -227,6 +375,11 @@ export function TagsSection({
                       {!choiceId && (
                         <div className="tag-choice-warning">
                           Select a bonus to apply.
+                        </div>
+                      )}
+                      {isLocked && (
+                        <div className="tag-choice-lock">
+                          Locked by class or origin.
                         </div>
                       )}
                     </div>

@@ -74,13 +74,13 @@ const EMPTY_ALLOCATIONS: Partial<Record<CivilAttributeKey, number>> = {};
 type OriginsSectionProps = {
   selected: OriginSelection;
   baseAttributes: CivilAttributes;
-  onConfirm: (next: OriginSelection, autoTags: string[]) => void;
+  onChange: (next: OriginSelection, autoTags: string[]) => void;
 };
 
 export function OriginsSection({
   selected,
   baseAttributes,
-  onConfirm,
+  onChange,
 }: OriginsSectionProps) {
   const [activeId, setActiveId] = useState<string | null>(
     selected.id
@@ -88,18 +88,9 @@ export function OriginsSection({
   const [draftAllocations, setDraftAllocations] = useState<
     Partial<Record<CivilAttributeKey, number>>
   >(selected.allocations ?? EMPTY_ALLOCATIONS);
-  const [choiceSelections, setChoiceSelections] = useState<
-    Record<number, string>
-  >({});
-
   useEffect(() => {
     setActiveId(selected.id);
     setDraftAllocations(selected.allocations ?? EMPTY_ALLOCATIONS);
-    const nextChoices: Record<number, string> = {};
-    selected.choiceTags.forEach((tag, index) => {
-      nextChoices[index] = tag;
-    });
-    setChoiceSelections(nextChoices);
   }, [selected]);
 
   const activeOrigin = useMemo(
@@ -117,11 +108,56 @@ export function OriginsSection({
   const spentPoints = spendableKeys.reduce((sum, key) => {
     return sum + (draftAllocations[key] ?? 0);
   }, 0);
-  const choicesComplete = activeOrigin
-    ? activeOrigin.grants.choices.every((_, idx) =>
-        Boolean(choiceSelections[idx])
-      )
-    : true;
+  const normalizedAllocations = useMemo(() => {
+    const normalized: Partial<Record<CivilAttributeKey, number>> = {};
+    spendableKeys.forEach(key => {
+      const value = draftAllocations[key] ?? 0;
+      if (value > 0) {
+        normalized[key] = value;
+      }
+    });
+    return normalized;
+  }, [draftAllocations, spendableKeys]);
+  const chosenTags = useMemo(() => {
+    if (!activeOrigin) return [];
+    if (activeOrigin.id === selected.id) {
+      return selected.choiceTags ?? [];
+    }
+    return [];
+  }, [activeOrigin, selected.id, selected.choiceTags]);
+  const autoTags = useMemo(() => {
+    if (!activeOrigin) return [];
+    return [
+      ...(activeOrigin.grants.tags ?? []),
+      ...chosenTags,
+    ];
+  }, [activeOrigin, chosenTags]);
+  function selectionsMatch(
+    nextSelection: OriginSelection,
+    currentSelection: OriginSelection
+  ) {
+    if (nextSelection.id !== currentSelection.id) return false;
+    const nextAlloc = nextSelection.allocations ?? {};
+    const currentAlloc = currentSelection.allocations ?? {};
+    const nextKeys = Object.keys(nextAlloc);
+    const currentKeys = Object.keys(currentAlloc);
+    if (nextKeys.length !== currentKeys.length) return false;
+    for (const key of nextKeys) {
+      if (
+        nextAlloc[key as CivilAttributeKey] !==
+        currentAlloc[key as CivilAttributeKey]
+      ) {
+        return false;
+      }
+    }
+    const nextChoices = nextSelection.choiceTags ?? [];
+    const currentChoices = currentSelection.choiceTags ?? [];
+    if (nextChoices.length !== currentChoices.length) return false;
+    for (let i = 0; i < nextChoices.length; i += 1) {
+      if (nextChoices[i] !== currentChoices[i]) return false;
+    }
+    return true;
+  }
 
   function handleSelect(origin: Origin) {
     setActiveId(origin.id);
@@ -129,7 +165,6 @@ export function OriginsSection({
       setDraftAllocations(selected.allocations ?? EMPTY_ALLOCATIONS);
     } else {
       setDraftAllocations({});
-      setChoiceSelections({});
     }
   }
 
@@ -155,31 +190,23 @@ export function OriginsSection({
     }));
   }
 
-  function handleConfirm() {
+  useEffect(() => {
     if (!activeOrigin) return;
-    const normalized: Partial<Record<CivilAttributeKey, number>> = {};
-    spendableKeys.forEach(key => {
-      const value = draftAllocations[key] ?? 0;
-      if (value > 0) {
-        normalized[key] = value;
-      }
-    });
-
-    const chosenTags = Object.values(choiceSelections).filter(Boolean);
-    const autoTags = [
-      ...(activeOrigin.grants.tags ?? []),
-      ...chosenTags,
-    ];
-
-    onConfirm(
-      {
-        id: activeOrigin.id,
-        allocations: normalized,
-        choiceTags: chosenTags,
-      },
-      autoTags
-    );
-  }
+    const nextSelection: OriginSelection = {
+      id: activeOrigin.id,
+      allocations: normalizedAllocations,
+      choiceTags: chosenTags,
+    };
+    if (selectionsMatch(nextSelection, selected)) return;
+    onChange(nextSelection, autoTags);
+  }, [
+    activeOrigin,
+    autoTags,
+    chosenTags,
+    normalizedAllocations,
+    onChange,
+    selected,
+  ]);
 
   return (
     <div className="origins-page">
@@ -291,54 +318,6 @@ export function OriginsSection({
                     );
                   })}
 
-                  {origin.grants.choices.length > 0 && (
-                    <div className="origin-choice">
-                      {origin.grants.choices.map((choice, idx) => (
-                        <div key={`${origin.id}-choice-${idx}`}>
-                          <div className="origin-choice-title">
-                            Choose {choice.choose}
-                          </div>
-                          {choice.options.map(option => (
-                            <label
-                              key={option}
-                              className="origin-choice-option"
-                              onClick={e => e.stopPropagation()}
-                            >
-                              <input
-                                type="radio"
-                                name={`${origin.id}-choice-${idx}`}
-                                checked={choiceSelections[idx] === option}
-                                onChange={() =>
-                                  setChoiceSelections(prev => ({
-                                    ...prev,
-                                    [idx]: option,
-                                  }))
-                                }
-                              />
-                              <span>{option}</span>
-                            </label>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <button
-                    className="button origin-confirm"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleConfirm();
-                    }}
-                    disabled={!choicesComplete}
-                  >
-                    Confirm Origin
-                  </button>
-                  {!choicesComplete && (
-                    <div className="origin-choice-warning">
-                      Select a tag choice to confirm.
-                    </div>
-                  )}
                 </div>
               )}
             </div>

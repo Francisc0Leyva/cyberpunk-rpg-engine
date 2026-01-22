@@ -24,7 +24,7 @@ export function WeaponSection({
   cyberMods,
   onChange,
 }: WeaponSectionProps) {
-  const isUnarmed = ["Unarmed Melee", "Grappling", "Kick"].includes(weapon.type);
+  const isUnarmedMelee = weapon.type === "Unarmed Melee";
 
   const systemLookup = useMemo(() => {
     const lookup: Record<string, CyberModSystemState | undefined> = {};
@@ -89,7 +89,7 @@ export function WeaponSection({
   }
 
   function stepDamage(delta: number) {
-    if (isUnarmed) return;
+    if (isUnarmedMelee) return;
     const next = Math.max(0, Math.min(1000, weapon.damage + delta));
     updateWeapon({ damage: next });
   }
@@ -128,14 +128,18 @@ export function WeaponSection({
       </div>
 
       {/* Weapon Damage */}
-      <div className="field-row">
+      <div
+        className={`field-row ${
+          isUnarmedMelee ? "weapon-damage-row disabled" : ""
+        }`}
+      >
         <label className="label">Weapon Damage</label>
         <div className="stepper-controls">
           <button
             className="stepper-button"
             type="button"
             onClick={() => stepDamage(-1)}
-            disabled={isUnarmed || weapon.damage <= 0}
+            disabled={isUnarmedMelee || weapon.damage <= 0}
           >
             -
           </button>
@@ -143,16 +147,18 @@ export function WeaponSection({
             type="number"
             min={0}
             max={1000}
-            className="input small-input weapon-damage-input"
+            className={`input small-input weapon-damage-input ${
+              isUnarmedMelee ? "weapon-damage-disabled" : ""
+            }`}
             value={weapon.damage}
             onChange={handleDamageChange}
-            disabled={isUnarmed}
+            disabled={isUnarmedMelee}
           />
           <button
             className="stepper-button"
             type="button"
             onClick={() => stepDamage(1)}
-            disabled={isUnarmed || weapon.damage >= 1000}
+            disabled={isUnarmedMelee || weapon.damage >= 1000}
           >
             +
           </button>
