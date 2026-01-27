@@ -1346,7 +1346,10 @@ export function CharacterSheet() {
         </div>
       ) : activeTab === "summary" ? (
         <div className="read-only-container">
-          <ReadOnlyCharacter character={character} />
+          <ReadOnlyCharacter
+            character={character}
+            attributeBonusSources={attributeBonusSources}
+          />
         </div>
       ) : activeTab === "cybermods" ? (
         <div className="cybermods-tab">

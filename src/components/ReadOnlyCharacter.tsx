@@ -1,7 +1,16 @@
-import type { Character, CivilAttributeKey } from "../types/character";
+import type {
+  AttributeKey,
+  Character,
+  CivilAttributeKey,
+} from "../types/character";
 import { CYBER_SYSTEMS } from "../data/cyberSystems";
 import originsData from "../data/constants/origins.json";
 import civilData from "../data/constants/civil_attributes.json";
+import type { AttributeBonusSource } from "../lib/attributeBonuses";
+import {
+  getAttributeTagBonusSources,
+  sumAttributeBonusSources,
+} from "../lib/attributeBonuses";
 import {
   getCivilTagBonusSources,
   sumCivilBonusSources,
@@ -10,9 +19,23 @@ import "./ReadOnlyCharacter.css";
 
 type ReadOnlyCharacterProps = {
   character: Character;
+  attributeBonusSources?: AttributeBonusSource[];
 };
 
-export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
+const ATTRIBUTE_LABELS: Record<AttributeKey, string> = {
+  body: "Body",
+  willpower: "Willpower",
+  cool: "Cool",
+  intelligence: "Intelligence",
+  reflexes: "Reflexes",
+  skill: "Skill",
+  technical: "Technical Ability",
+};
+
+export function ReadOnlyCharacter({
+  character,
+  attributeBonusSources,
+}: ReadOnlyCharacterProps) {
   const activeTags = Object.entries(character.tags)
     .filter(([, active]) => active)
     .map(([name]) => name);
@@ -51,7 +74,12 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
 
   const civilAttributes = (
     civilData as {
-      attributes: { id: CivilAttributeKey; name: string }[];
+      attributes: {
+        id: CivilAttributeKey;
+        name: string;
+        min: number;
+        max: number;
+      }[];
     }
   ).attributes;
   const civilBonusSources = [
@@ -60,6 +88,16 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
   ];
   const civilBonusTotals = sumCivilBonusSources(civilBonusSources);
 
+  const resolvedAttributeSources =
+    attributeBonusSources ??
+    getAttributeTagBonusSources(
+      character.tags,
+      character.tagChoices
+    );
+  const attributeBonusTotals = sumAttributeBonusSources(
+    resolvedAttributeSources
+  );
+
   return (
     <div className="readonly-card">
       <h2>{character.name}</h2>
@@ -67,11 +105,32 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
       <section>
         <h3>Attributes</h3>
         <ul>
-          {Object.entries(character.attributes).map(([key, value]) => (
-            <li key={key}>
-              <strong>{key}:</strong> {value}
-            </li>
-          ))}
+          {Object.entries(character.attributes).map(([key, value]) => {
+            const attrKey = key as AttributeKey;
+            const bonusValue = attributeBonusTotals[attrKey] ?? 0;
+            const total = Math.min(50, Number(value) + bonusValue);
+            const bonusLines = resolvedAttributeSources
+              .map(source => ({
+                label: source.label,
+                value: source.values[attrKey] ?? 0,
+              }))
+              .filter(entry => Number(entry.value) !== 0)
+              .map(
+                entry =>
+                  `${entry.label} ${entry.value > 0 ? "+" : ""}${entry.value}`
+              );
+            const bonusLabel =
+              bonusLines.length > 0
+                ? ` (${bonusLines.join(", ")})`
+                : "";
+            return (
+              <li key={key}>
+                <strong>{ATTRIBUTE_LABELS[attrKey] ?? key}:</strong>{" "}
+                {total}
+                {bonusLabel}
+              </li>
+            );
+          })}
         </ul>
       </section>
 
@@ -81,7 +140,11 @@ export function ReadOnlyCharacter({ character }: ReadOnlyCharacterProps) {
           {civilAttributes.map(attr => {
             const baseValue = character.civilAttributes[attr.id] ?? 0;
             const bonusValue = civilBonusTotals[attr.id] ?? 0;
-            const total = baseValue + bonusValue;
+            const rawTotal = baseValue + bonusValue;
+            const total = Math.max(
+              attr.min,
+              Math.min(attr.max, rawTotal)
+            );
             const bonusLines = civilBonusSources
               .map(source => ({
                 label: source.label,

@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import "./AttributesSection.css";
 
 import type { Attributes, AttributeKey } from "../types/character";
@@ -71,7 +78,7 @@ export function AttributesSection({
     };
     attributeList.forEach(([, key]) => {
       const raw = Number(attributes[key] ?? 0) + getBonus(bonusTotals, key);
-      next[key] = raw;
+      next[key] = Math.min(50, raw);
     });
     return next;
   }, [attributes, bonusTotals]);
@@ -84,6 +91,17 @@ export function AttributesSection({
         ])
       ) as Record<AttributeKey, string>
   );
+  const draftsRef = useRef<Record<AttributeKey, string>>(drafts);
+  const totalsRef = useRef(totals);
+  const attributesRef = useRef(attributes);
+  const bonusTotalsRef = useRef(bonusTotals);
+  const baseTotalRef = useRef(baseTotal);
+  const pointsSummaryRef = useRef(pointsSummary);
+  const loreAccurateRef = useRef(loreAccurate);
+  const lockedRef = useRef(locked);
+  const holdStateRef = useRef<
+    Record<string, { timeoutId: number | null; active: boolean }>
+  >({});
 
   useEffect(() => {
     setDrafts(
@@ -96,6 +114,48 @@ export function AttributesSection({
     );
   }, [totals]);
 
+  useEffect(() => {
+    draftsRef.current = drafts;
+  }, [drafts]);
+
+  useEffect(() => {
+    totalsRef.current = totals;
+  }, [totals]);
+
+  useEffect(() => {
+    attributesRef.current = attributes;
+  }, [attributes]);
+
+  useEffect(() => {
+    bonusTotalsRef.current = bonusTotals;
+  }, [bonusTotals]);
+
+  useEffect(() => {
+    baseTotalRef.current = baseTotal;
+  }, [baseTotal]);
+
+  useEffect(() => {
+    pointsSummaryRef.current = pointsSummary;
+  }, [pointsSummary]);
+
+  useEffect(() => {
+    loreAccurateRef.current = loreAccurate;
+  }, [loreAccurate]);
+
+  useEffect(() => {
+    lockedRef.current = locked;
+  }, [locked]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(holdStateRef.current).forEach(state => {
+        if (state.timeoutId !== null) {
+          window.clearTimeout(state.timeoutId);
+        }
+      });
+    };
+  }, []);
+
   function getMaxBaseForKey(key: AttributeKey) {
     if (!loreAccurate || !pointsSummary) {
       return 50;
@@ -106,18 +166,55 @@ export function AttributesSection({
     return Math.min(50, maxBaseTotal - otherTotal);
   }
 
+  function getMaxBaseForKeyRef(key: AttributeKey) {
+    if (!loreAccurateRef.current || !pointsSummaryRef.current) {
+      return 50;
+    }
+    const baselineTotal = attributeList.length * 10;
+    const maxBaseTotal =
+      baselineTotal + pointsSummaryRef.current.total;
+    const otherTotal =
+      baseTotalRef.current -
+      Number(attributesRef.current[key] ?? 0);
+    return Math.min(50, maxBaseTotal - otherTotal);
+  }
+
   function getTotalBounds(key: AttributeKey) {
     const bonus = getBonus(bonusTotals, key);
-    const minTotal = 10 + bonus;
+    const minTotalRaw = 10 + bonus;
     const maxBase = getMaxBaseForKey(key);
-    const maxTotal = maxBase + bonus;
+    const maxTotalRaw = maxBase + bonus;
+    const maxTotal = Math.min(50, maxTotalRaw);
+    const minTotal = Math.min(maxTotal, minTotalRaw);
     return { bonus, minTotal, maxBase, maxTotal };
   }
 
-  function getCurrentValue(key: AttributeKey) {
-    const n = Number(drafts[key]);
+  function getTotalBoundsRef(key: AttributeKey) {
+    const bonus = getBonus(bonusTotalsRef.current, key);
+    const minTotalRaw = 10 + bonus;
+    const maxBase = getMaxBaseForKeyRef(key);
+    const maxTotalRaw = maxBase + bonus;
+    const maxTotal = Math.min(50, maxTotalRaw);
+    const minTotal = Math.min(maxTotal, minTotalRaw);
+    return { bonus, minTotal, maxBase, maxTotal };
+  }
+
+  function getValueFrom(
+    source: Record<AttributeKey, string>,
+    fallback: Record<AttributeKey, number>,
+    key: AttributeKey
+  ) {
+    const n = Number(source[key]);
     if (Number.isFinite(n)) return n;
-    return Number(totals[key] ?? 10);
+    return Number(fallback[key] ?? 10);
+  }
+
+  function getCurrentValue(key: AttributeKey) {
+    return getValueFrom(drafts, totals, key);
+  }
+
+  function getCurrentValueRef(key: AttributeKey) {
+    return getValueFrom(draftsRef.current, totalsRef.current, key);
   }
 
   function updateAttr(key: AttributeKey, value: string) {
@@ -128,13 +225,14 @@ export function AttributesSection({
 
     const n = Number(value);
     if (!Number.isFinite(n)) return;
-    const { bonus, minTotal, maxBase, maxTotal } = getTotalBounds(key);
+    const { bonus, minTotal, maxBase, maxTotal } =
+      getTotalBoundsRef(key);
     if (n < minTotal || n > maxTotal) return;
 
     const nextBase = n - bonus;
     const clampedBase = Math.max(10, Math.min(maxBase, nextBase));
     onChange({
-      ...attributes,
+      ...attributesRef.current,
       [key]: clampedBase,
     });
   }
@@ -157,21 +255,115 @@ export function AttributesSection({
 
     if (nextBase !== attributes[key]) {
       onChange({
-        ...attributes,
+        ...attributesRef.current,
         [key]: nextBase,
       });
     }
   }
 
   function stepAttr(key: AttributeKey, delta: number) {
-    if (locked) return;
-    const current = getCurrentValue(key);
-    const { minTotal, maxTotal } = getTotalBounds(key);
+    if (lockedRef.current) return;
+    const current = getCurrentValueRef(key);
+    const { minTotal, maxTotal } = getTotalBoundsRef(key);
     const next = Math.max(
       minTotal,
       Math.min(maxTotal, current + delta)
     );
     updateAttr(key, String(next));
+  }
+
+  function canDecreaseRef(key: AttributeKey) {
+    const { minTotal } = getTotalBoundsRef(key);
+    return !lockedRef.current && getCurrentValueRef(key) > minTotal;
+  }
+
+  function canIncreaseRef(key: AttributeKey) {
+    const { maxTotal, maxBase } = getTotalBoundsRef(key);
+    const currentTotal = getCurrentValueRef(key);
+    const points = pointsSummaryRef.current;
+    const hasPoints =
+      !loreAccurateRef.current ||
+      !points ||
+      (points.remaining > 0 &&
+        Number(attributesRef.current[key] ?? 0) < maxBase);
+    return !lockedRef.current && hasPoints && currentTotal < maxTotal;
+  }
+
+  function getHoldState(key: AttributeKey, delta: number) {
+    const id = `${key}:${delta}`;
+    const existing = holdStateRef.current[id];
+    if (existing) return existing;
+    const next = { timeoutId: null, active: false };
+    holdStateRef.current[id] = next;
+    return next;
+  }
+
+  function clearHold(key: AttributeKey, delta: number) {
+    const state = getHoldState(key, delta);
+    state.active = false;
+    if (state.timeoutId !== null) {
+      window.clearTimeout(state.timeoutId);
+      state.timeoutId = null;
+    }
+  }
+
+  function makeHoldHandlers(
+    key: AttributeKey,
+    delta: number,
+    canStep: () => boolean
+  ) {
+    const clear = () => clearHold(key, delta);
+
+    const tick = () => {
+      const state = getHoldState(key, delta);
+      if (!state.active) return;
+      if (!canStep()) {
+        clear();
+        return;
+      }
+      stepAttr(key, delta);
+      state.timeoutId = window.setTimeout(tick, 60);
+    };
+
+    const start = (e: PointerEvent<HTMLButtonElement>) => {
+      if (e.button !== 0) return;
+      if (!canStep()) return;
+      const state = getHoldState(key, delta);
+      e.currentTarget.setPointerCapture(e.pointerId);
+      state.active = true;
+      stepAttr(key, delta);
+      state.timeoutId = window.setTimeout(tick, 300);
+    };
+
+    const onPointerMove = (e: PointerEvent<HTMLButtonElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+      if (!inside) {
+        clear();
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    };
+
+    const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+      if (e.key !== " " && e.key !== "Enter") return;
+      e.preventDefault();
+      if (!canStep()) return;
+      stepAttr(key, delta);
+    };
+
+    return {
+      onPointerDown: start,
+      onPointerMove,
+      onPointerUp: clear,
+      onPointerCancel: clear,
+      onPointerLeave: clear,
+      onLostPointerCapture: clear,
+      onKeyDown,
+    };
   }
 
   return (
@@ -198,54 +390,64 @@ export function AttributesSection({
       ) : null}
 
       {attributeList.map(([label, key]) => {
-      const bonusLines = bonusSources
-        .map(source => ({
-          label: source.label,
-          value: source.values[key] ?? 0,
-        }))
-        .filter(entry => Number(entry.value) !== 0);
-      const { minTotal, maxBase, maxTotal } = getTotalBounds(key);
-      const currentTotal = getCurrentValue(key);
-      const canIncrease =
-        !locked &&
-        (!loreAccurate ||
-          !pointsSummary ||
-          (pointsSummary.remaining > 0 &&
-            Number(attributes[key] ?? 0) < maxBase)) &&
-        currentTotal < maxTotal;
-      return (
-        <div className="attribute-row" key={key}>
-          <div className="field-row">
-            <label className="label">{label}:</label>
-            <div className="stepper-controls">
-              <button
-                className="stepper-button"
-                type="button"
-                onClick={() => stepAttr(key, -1)}
-                disabled={locked || currentTotal <= minTotal}
-              >
-                -
-              </button>
-              <input
-                className="input small-input"
-                type="number"
-                min={minTotal}
-                max={maxTotal}
-                value={drafts[key]}
-                disabled={locked}
-                onChange={(e) => updateAttr(key, e.target.value)}
-                onBlur={() => commitAttr(key)}
-              />
-              <button
-                className="stepper-button"
-                type="button"
-                onClick={() => stepAttr(key, 1)}
-                disabled={!canIncrease}
-              >
-                +
-              </button>
+        const bonusLines = bonusSources
+          .map(source => ({
+            label: source.label,
+            value: source.values[key] ?? 0,
+          }))
+          .filter(entry => Number(entry.value) !== 0);
+        const { minTotal, maxBase, maxTotal } = getTotalBounds(key);
+        const currentTotal = getCurrentValue(key);
+        const canIncrease =
+          !locked &&
+          (!loreAccurate ||
+            !pointsSummary ||
+            (pointsSummary.remaining > 0 &&
+              Number(attributes[key] ?? 0) < maxBase)) &&
+          currentTotal < maxTotal;
+        const decHold = makeHoldHandlers(
+          key,
+          -1,
+          () => canDecreaseRef(key)
+        );
+        const incHold = makeHoldHandlers(
+          key,
+          1,
+          () => canIncreaseRef(key)
+        );
+        return (
+          <div className="attribute-row" key={key}>
+            <div className="field-row">
+              <label className="label">{label}:</label>
+              <div className="stepper-controls">
+                <button
+                  className="stepper-button"
+                  type="button"
+                  {...decHold}
+                  disabled={locked || currentTotal <= minTotal}
+                >
+                  -
+                </button>
+                <input
+                  className="input small-input"
+                  type="number"
+                  min={minTotal}
+                  max={maxTotal}
+                  value={drafts[key]}
+                  disabled={locked}
+                  onChange={(e) => updateAttr(key, e.target.value)}
+                  onBlur={() => commitAttr(key)}
+                />
+                <button
+                  className="stepper-button"
+                  type="button"
+                  {...incHold}
+                  disabled={!canIncrease}
+                >
+                  +
+                </button>
+              </div>
             </div>
-          </div>
             {bonusLines.map(entry => (
               <div
                 key={`${key}-${entry.label}`}
