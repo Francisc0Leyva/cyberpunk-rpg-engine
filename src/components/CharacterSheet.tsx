@@ -1250,27 +1250,11 @@ export function CharacterSheet() {
         </button>
         <button
           className={`tab-button ${
-            activeTab === "summary" ? "active" : ""
+            activeTab === "classes" ? "active" : ""
           }`}
-          onClick={() => setActiveTab("summary")}
+          onClick={() => setActiveTab("classes")}
         >
-          Read-Only Summary
-        </button>
-        <button
-          className={`tab-button ${
-            activeTab === "cybermods" ? "active" : ""
-          }`}
-          onClick={() => setActiveTab("cybermods")}
-        >
-          Cyber Mods
-        </button>
-        <button
-          className={`tab-button ${
-            activeTab === "tags" ? "active" : ""
-          }`}
-          onClick={() => setActiveTab("tags")}
-        >
-          Tags
+          Class
         </button>
         <button
           className={`tab-button ${
@@ -1282,11 +1266,27 @@ export function CharacterSheet() {
         </button>
         <button
           className={`tab-button ${
-            activeTab === "classes" ? "active" : ""
+            activeTab === "tags" ? "active" : ""
           }`}
-          onClick={() => setActiveTab("classes")}
+          onClick={() => setActiveTab("tags")}
         >
-          Class
+          Tags
+        </button>
+        <button
+          className={`tab-button ${
+            activeTab === "cybermods" ? "active" : ""
+          }`}
+          onClick={() => setActiveTab("cybermods")}
+        >
+          Cyber Mods
+        </button>
+        <button
+          className={`tab-button ${
+            activeTab === "summary" ? "active" : ""
+          }`}
+          onClick={() => setActiveTab("summary")}
+        >
+          Read-Only Summary
         </button>
       </div>
 

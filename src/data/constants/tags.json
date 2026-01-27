@@ -513,7 +513,14 @@
       "categoryId": "int_tech_skill",
       "cost": "++",
       "description": "When a D20 lands on a 20 for an Intelligence-related skillcheck, allow it to succeed.",
-      "effects": []
+      "effects": [
+        {
+          "kind": "rule",
+          "target": "checks.intelligence",
+          "op": "autoSuccessOnCrit",
+          "value": 1
+        }
+      ]
     },
     "dance": {
       "name": "Dance",
