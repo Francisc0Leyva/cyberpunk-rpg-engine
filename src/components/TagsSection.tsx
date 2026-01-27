@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import "./TagsSection.css";
 import tagsData from "../data/constants/tags.json";
 import type { TagChoices, TagSelections } from "../types/character";
@@ -9,11 +9,12 @@ type TagItem = {
   categoryId: string;
   cost: string;
   description: string;
+  effects?: TagEffect[];
   choices?: Array<{
     id: string;
     label: string;
+    effects?: TagEffect[];
   }>;
-  effects?: unknown[];
 };
 
 type TagCategory = {
@@ -45,6 +46,20 @@ type TagsJson = {
   items: Record<string, TagItem>;
 };
 
+type TagEffect = {
+  kind?: string;
+  target?: string;
+  status?: string;
+};
+
+type EffectFilter =
+  | "all"
+  | "combat"
+  | "civil"
+  | "attributes"
+  | "checks"
+  | "status";
+
 const TAG_DATA = tagsData as TagsJson;
 const TAG_ITEMS = Object.entries(TAG_DATA.items ?? {}).map(
   ([id, item]) => ({
@@ -67,6 +82,56 @@ const TAGS_BY_CATEGORY = CATEGORY_ORDER.map(category => ({
 const UNCATEGORIZED_TAGS = TAG_ITEMS.filter(
   item => !CATEGORY_SET.has(item.categoryId)
 ).sort((a, b) => a.name.localeCompare(b.name));
+
+function getItemEffects(item: TagItem): TagEffect[] {
+  const choiceEffects =
+    item.choices?.flatMap(choice => choice.effects ?? []) ?? [];
+  return [...(item.effects ?? []), ...choiceEffects];
+}
+
+function getTargetPrefix(target?: string) {
+  if (!target) return null;
+  const [prefix] = target.split(".");
+  return prefix ?? null;
+}
+
+const COMBAT_ATTRIBUTE_KEYS = new Set(["body", "cool", "reflexes"]);
+
+function isCombatAttributeTarget(target?: string) {
+  if (!target) return false;
+  if (!target.startsWith("attributes.")) return false;
+  const [, key] = target.split(".");
+  return Boolean(key && COMBAT_ATTRIBUTE_KEYS.has(key));
+}
+
+function matchesCombatEffects(item: TagItem) {
+  if (item.categoryId === "martial_arts") return true;
+  const effects = getItemEffects(item);
+  return effects.some(
+    effect =>
+      effect.kind === "onHitStatus" ||
+      getTargetPrefix(effect.target) === "combat" ||
+      isCombatAttributeTarget(effect.target)
+  );
+}
+
+function renderCost(cost?: string) {
+  if (!cost) return null;
+  const symbols = cost.split("");
+  const allPlus = symbols.every(symbol => symbol === "+");
+  if (!allPlus) {
+    return <span className="tag-cost-text">{cost}</span>;
+  }
+  return (
+    <span className="tag-cost" aria-label={`Cost ${cost}`}>
+      {symbols.map((symbol, index) => (
+        <span key={`${symbol}-${index}`} className="tag-cost-plus">
+          {symbol}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 type TagsSectionProps = {
   selected: TagSelections;
@@ -99,7 +164,62 @@ export function TagsSection({
   originChoice = null,
   onOriginChoiceSelect,
 }: TagsSectionProps) {
+  const [search, setSearch] = useState("");
+  const [effectFilter, setEffectFilter] =
+    useState<EffectFilter>("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [hasEffectsOnly, setHasEffectsOnly] = useState(false);
+  const [costFilter, setCostFilter] = useState("all");
   const lockedSet = useMemo(() => new Set(lockedTags), [lockedTags]);
+  const normalizedSearch = search.trim().toLowerCase();
+  const costOptions = useMemo(() => {
+    return Object.keys(COST_SCALE)
+      .filter(Boolean)
+      .sort((a, b) => a.length - b.length);
+  }, []);
+  const statusOptions = useMemo(() => {
+    const statuses = new Set<string>();
+    TAG_ITEMS.forEach(item => {
+      getItemEffects(item).forEach(effect => {
+        if (effect.kind === "onHitStatus" && effect.status) {
+          statuses.add(effect.status);
+        }
+      });
+    });
+    return Array.from(statuses).sort((a, b) => a.localeCompare(b));
+  }, []);
+  const matchesSearch = (item: TagItem) => {
+    if (!normalizedSearch) return true;
+    return (
+      item.name.toLowerCase().includes(normalizedSearch) ||
+      item.description.toLowerCase().includes(normalizedSearch)
+    );
+  };
+  const matchesFilters = (item: TagItem) => {
+    if (!matchesSearch(item)) return false;
+    if (costFilter !== "all" && item.cost !== costFilter) {
+      return false;
+    }
+    const effects = getItemEffects(item);
+    if (hasEffectsOnly && effects.length === 0) return false;
+    if (effectFilter === "all") return true;
+    if (effectFilter === "status") {
+      const statusEffects = effects.filter(
+        effect => effect.kind === "onHitStatus"
+      );
+      if (statusEffects.length === 0) return false;
+      if (statusFilter === "all") return true;
+      return statusEffects.some(
+        effect => effect.status === statusFilter
+      );
+    }
+    if (effectFilter === "combat") {
+      return matchesCombatEffects(item);
+    }
+    return effects.some(
+      effect => getTargetPrefix(effect.target) === effectFilter
+    );
+  };
   const selectedLabels = useMemo(() => {
     const items = [...TAG_ITEMS, ...UNCATEGORIZED_TAGS];
     return items
@@ -171,6 +291,28 @@ export function TagsSection({
   }, [selected, lockedSet, freeTagAllowances]);
   const pointsName = TAG_DATA.rules?.pointsName ?? "Tag Points";
 
+  const filteredCategories = useMemo(() => {
+    return TAGS_BY_CATEGORY.map(category => ({
+      ...category,
+      items: category.items.filter(matchesFilters),
+    })).filter(category => category.items.length > 0);
+  }, [
+    normalizedSearch,
+    effectFilter,
+    statusFilter,
+    hasEffectsOnly,
+    costFilter,
+  ]);
+  const filteredUncategorized = useMemo(() => {
+    return UNCATEGORIZED_TAGS.filter(matchesFilters);
+  }, [
+    normalizedSearch,
+    effectFilter,
+    statusFilter,
+    hasEffectsOnly,
+    costFilter,
+  ]);
+
   return (
     <div className="tags-page">
       <div className="tags-summary">
@@ -192,6 +334,77 @@ export function TagsSection({
             </span>
           ) : null}
         </div>
+      </div>
+      <div className="tags-filters">
+        <input
+          className="input tags-search-input"
+          type="search"
+          placeholder="Search tags..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <label className="tags-filter">
+          <span className="tags-filter-label">What does it do?</span>
+          <select
+            className="tags-filter-select"
+            value={effectFilter}
+            onChange={(e) => {
+              const next = e.target.value as EffectFilter;
+              setEffectFilter(next);
+              if (next !== "status") {
+                setStatusFilter("all");
+              }
+            }}
+          >
+            <option value="all">All effects</option>
+            <option value="combat">Affects combat</option>
+            <option value="civil">Affects civil</option>
+            <option value="attributes">Affects attributes</option>
+            <option value="checks">Affects checks</option>
+            <option value="status">Status effects</option>
+          </select>
+        </label>
+        {effectFilter === "status" ? (
+          <label className="tags-filter">
+            <span className="tags-filter-label">Status</span>
+            <select
+              className="tags-filter-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All statuses</option>
+              {statusOptions.map(status => (
+                <option key={status} value={status}>
+                  {status.charAt(0).toUpperCase() +
+                    status.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        <label className="tags-filter">
+          <span className="tags-filter-label">Cost</span>
+          <select
+            className="tags-filter-select"
+            value={costFilter}
+            onChange={(e) => setCostFilter(e.target.value)}
+          >
+            <option value="all">All costs</option>
+            {costOptions.map(cost => (
+              <option key={cost} value={cost}>
+                {cost}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="tags-filter-toggle">
+          <input
+            type="checkbox"
+            checked={hasEffectsOnly}
+            onChange={(e) => setHasEffectsOnly(e.target.checked)}
+          />
+          <span>Has effects</span>
+        </label>
       </div>
 
       {originChoice && originChoice.choices.length > 0 ? (
@@ -233,7 +446,7 @@ export function TagsSection({
       ) : null}
 
       <div className="tags-grid">
-        {TAGS_BY_CATEGORY.map(category => (
+        {filteredCategories.map(category => (
           <div key={category.id} className="tag-card">
             <div className="tag-card-title">{category.name}</div>
             {freeUsage[category.id]?.total ? (
@@ -271,7 +484,10 @@ export function TagsSection({
                         }}
                       />
                       <div className="tag-text">
-                        <div className="tag-name">{item.name}</div>
+                        <div className="tag-name-row">
+                          <div className="tag-name">{item.name}</div>
+                          {renderCost(item.cost)}
+                        </div>
                         <div className="tag-description">
                           {item.description}
                         </div>
@@ -316,11 +532,11 @@ export function TagsSection({
             </div>
           </div>
         ))}
-        {UNCATEGORIZED_TAGS.length > 0 && (
+        {filteredUncategorized.length > 0 && (
           <div className="tag-card">
             <div className="tag-card-title">Uncategorized</div>
             <div className="tag-card-list">
-            {UNCATEGORIZED_TAGS.map(item => {
+            {filteredUncategorized.map(item => {
               const isSelected = Boolean(selected[item.name]);
               const isLocked = lockedSet.has(item.name);
               const choiceId = choices[item.name] ?? "";
@@ -345,7 +561,10 @@ export function TagsSection({
                       }}
                     />
                     <div className="tag-text">
-                      <div className="tag-name">{item.name}</div>
+                      <div className="tag-name-row">
+                        <div className="tag-name">{item.name}</div>
+                        {renderCost(item.cost)}
+                      </div>
                       <div className="tag-description">
                         {item.description}
                       </div>
