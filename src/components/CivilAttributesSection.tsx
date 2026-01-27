@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent,
+} from "react";
 import "./CivilAttributesSection.css";
 
 import type {
@@ -95,6 +102,13 @@ export function CivilAttributesSection({
         ])
       ) as Record<CivilAttributeKey, string>
   );
+  const draftsRef = useRef<Record<CivilAttributeKey, string>>(drafts);
+  const totalsRef = useRef(totals);
+  const attributesRef = useRef(attributes);
+  const bonusTotalsRef = useRef(bonusTotals);
+  const holdStateRef = useRef<
+    Record<string, { timeoutId: number | null; active: boolean }>
+  >({});
 
   useEffect(() => {
     setDrafts(
@@ -106,6 +120,32 @@ export function CivilAttributesSection({
       ) as Record<CivilAttributeKey, string>
     );
   }, [totals]);
+
+  useEffect(() => {
+    draftsRef.current = drafts;
+  }, [drafts]);
+
+  useEffect(() => {
+    totalsRef.current = totals;
+  }, [totals]);
+
+  useEffect(() => {
+    attributesRef.current = attributes;
+  }, [attributes]);
+
+  useEffect(() => {
+    bonusTotalsRef.current = bonusTotals;
+  }, [bonusTotals]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(holdStateRef.current).forEach(state => {
+        if (state.timeoutId !== null) {
+          window.clearTimeout(state.timeoutId);
+        }
+      });
+    };
+  }, []);
 
   function clamp(attr: CivilAttributeDef, value: number) {
     return Math.max(attr.min, Math.min(attr.max, value));
@@ -120,6 +160,17 @@ export function CivilAttributesSection({
     });
   }
 
+  function getCurrentValueRef(attr: CivilAttributeDef) {
+    const n = Number(draftsRef.current[attr.id]);
+    if (Number.isFinite(n)) return n;
+    return getTotal(
+      attributesRef.current,
+      bonusTotalsRef.current,
+      attr.id,
+      { min: attr.min, max: attr.max }
+    );
+  }
+
   function updateAttr(attr: CivilAttributeDef, value: string) {
     setDrafts(prev => ({
       ...prev,
@@ -130,10 +181,10 @@ export function CivilAttributesSection({
     if (!Number.isFinite(n)) return;
     if (n < attr.min || n > attr.max) return;
 
-    const bonus = getBonus(bonusTotals, attr.id);
+    const bonus = getBonus(bonusTotalsRef.current, attr.id);
     const nextBase = n - bonus;
     onChange({
-      ...attributes,
+      ...attributesRef.current,
       [attr.id]: nextBase,
     });
   }
@@ -156,16 +207,93 @@ export function CivilAttributesSection({
 
     if (nextBase !== attributes[attr.id]) {
       onChange({
-        ...attributes,
+        ...attributesRef.current,
         [attr.id]: nextBase,
       });
     }
   }
 
   function stepAttr(attr: CivilAttributeDef, delta: number) {
-    const current = getCurrentValue(attr);
+    const current = getCurrentValueRef(attr);
     const next = clamp(attr, current + delta);
     updateAttr(attr, String(next));
+  }
+
+  function getHoldState(attr: CivilAttributeDef, delta: number) {
+    const id = `${attr.id}:${delta}`;
+    const existing = holdStateRef.current[id];
+    if (existing) return existing;
+    const next = { timeoutId: null, active: false };
+    holdStateRef.current[id] = next;
+    return next;
+  }
+
+  function clearHold(attr: CivilAttributeDef, delta: number) {
+    const state = getHoldState(attr, delta);
+    state.active = false;
+    if (state.timeoutId !== null) {
+      window.clearTimeout(state.timeoutId);
+      state.timeoutId = null;
+    }
+  }
+
+  function makeHoldHandlers(
+    attr: CivilAttributeDef,
+    delta: number,
+    canStep: () => boolean
+  ) {
+    const clear = () => clearHold(attr, delta);
+
+    const tick = () => {
+      const state = getHoldState(attr, delta);
+      if (!state.active) return;
+      if (!canStep()) {
+        clear();
+        return;
+      }
+      stepAttr(attr, delta);
+      state.timeoutId = window.setTimeout(tick, 60);
+    };
+
+    const start = (e: PointerEvent<HTMLButtonElement>) => {
+      if (e.button !== 0) return;
+      if (!canStep()) return;
+      const state = getHoldState(attr, delta);
+      e.currentTarget.setPointerCapture(e.pointerId);
+      state.active = true;
+      stepAttr(attr, delta);
+      state.timeoutId = window.setTimeout(tick, 300);
+    };
+
+    const onPointerMove = (e: PointerEvent<HTMLButtonElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+      if (!inside) {
+        clear();
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    };
+
+    const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+      if (e.key !== " " && e.key !== "Enter") return;
+      e.preventDefault();
+      if (!canStep()) return;
+      stepAttr(attr, delta);
+    };
+
+    return {
+      onPointerDown: start,
+      onPointerMove,
+      onPointerUp: clear,
+      onPointerCancel: clear,
+      onPointerLeave: clear,
+      onLostPointerCapture: clear,
+      onKeyDown,
+    };
   }
 
   return (
@@ -179,6 +307,19 @@ export function CivilAttributesSection({
             value: source.values[attr.id] ?? 0,
           }))
           .filter(entry => Number(entry.value) !== 0);
+        const currentValue = getCurrentValue(attr);
+        const canDecrease = currentValue > attr.min;
+        const canIncrease = currentValue < attr.max;
+        const decHold = makeHoldHandlers(
+          attr,
+          -1,
+          () => getCurrentValueRef(attr) > attr.min
+        );
+        const incHold = makeHoldHandlers(
+          attr,
+          1,
+          () => getCurrentValueRef(attr) < attr.max
+        );
         return (
           <div key={attr.id} className="civil-attribute">
             <div className="civil-attribute-header">
@@ -187,8 +328,8 @@ export function CivilAttributesSection({
                 <button
                   className="stepper-button"
                   type="button"
-                  onClick={() => stepAttr(attr, -1)}
-                  disabled={getCurrentValue(attr) <= attr.min}
+                  {...decHold}
+                  disabled={!canDecrease}
                 >
                   -
                 </button>
@@ -204,8 +345,8 @@ export function CivilAttributesSection({
                 <button
                   className="stepper-button"
                   type="button"
-                  onClick={() => stepAttr(attr, 1)}
-                  disabled={getCurrentValue(attr) >= attr.max}
+                  {...incHold}
+                  disabled={!canIncrease}
                 >
                   +
                 </button>
