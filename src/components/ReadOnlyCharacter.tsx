@@ -12,6 +12,7 @@ import {
   sumAttributeBonusSources,
 } from "../lib/attributeBonuses";
 import {
+  getCyberCivilBonusSources,
   getCivilTagBonusSources,
   sumCivilBonusSources,
 } from "../lib/civilBonuses";
@@ -84,6 +85,7 @@ export function ReadOnlyCharacter({
   ).attributes;
   const civilBonusSources = [
     { label: "Origin", values: character.origin.allocations },
+    ...getCyberCivilBonusSources(character.cyberMods),
     ...getCivilTagBonusSources(character.tags, character.tagChoices),
   ];
   const civilBonusTotals = sumCivilBonusSources(civilBonusSources);

@@ -434,7 +434,7 @@ export function AttributesSection({
                   min={minTotal}
                   max={maxTotal}
                   value={drafts[key]}
-                  disabled={locked}
+                  disabled={locked || loreAccurate}
                   onChange={(e) => updateAttr(key, e.target.value)}
                   onBlur={() => commitAttr(key)}
                 />

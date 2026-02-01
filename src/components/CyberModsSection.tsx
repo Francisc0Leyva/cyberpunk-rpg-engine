@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import "./CyberModsSection.css";
 
 import { CYBER_SYSTEMS, type SystemConfig } from "../data/cyberSystems";
@@ -5,6 +6,12 @@ import type {
   CyberModSystemState,
   CyberModsState,
 } from "../types/character";
+
+const HANDS_MODS_REQUIRING_GORILLA_ARMS = new Set([
+  "Rippers",
+  "Wolvers",
+  "Big Knucks",
+]);
 
 type CyberModsSectionProps = {
   selections: CyberModsState;
@@ -26,6 +33,7 @@ function CyberModsSection({
             key={system.system}
             config={system}
             value={selections[system.system]}
+            allSelections={selections}
             onChange={next => onSystemChange(system.system, next)}
             onSelectInfo={onSelectInfo}
           />
@@ -38,6 +46,7 @@ function CyberModsSection({
 type CyberSystemBlockProps = {
   config: SystemConfig;
   value: CyberModSystemState | undefined;
+  allSelections: CyberModsState;
   onChange: (next: CyberModSystemState) => void;
   onSelectInfo?: (info: string) => void;
 };
@@ -45,10 +54,14 @@ type CyberSystemBlockProps = {
 function CyberSystemBlock({
   config,
   value,
+  allSelections,
   onChange,
   onSelectInfo,
 }: CyberSystemBlockProps) {
   const isHands = config.system === "Hands";
+  const gorillaArmsSelected = Boolean(
+    allSelections["Arms"]?.slots?.includes("Gorilla Arms")
+  );
 
   const baseSlots = config.slots ?? 1;
   const totalSlots = isHands ? baseSlots + 1 : baseSlots;
@@ -56,6 +69,24 @@ function CyberSystemBlock({
   const selected = value?.slots ?? Array(totalSlots).fill("None");
   const showExtraSlot =
     isHands && selected.some(name => name === "Pretty Tattoo");
+
+  useEffect(() => {
+    if (!isHands || gorillaArmsSelected) return;
+    if (
+      !selected.some(name =>
+        HANDS_MODS_REQUIRING_GORILLA_ARMS.has(name)
+      )
+    ) {
+      return;
+    }
+
+    onChange({
+      slots: selected.map(name =>
+        HANDS_MODS_REQUIRING_GORILLA_ARMS.has(name) ? "None" : name
+      ),
+      tier: value?.tier,
+    });
+  }, [isHands, gorillaArmsSelected, selected, onChange, value?.tier]);
 
   function handleChange(slotIndex: number, newValue: string) {
     const copy = [...selected];
@@ -94,9 +125,15 @@ function CyberSystemBlock({
   function optionsForSlot(slotIndex: number): string[] {
     const base = ["None"];
     const taken = new Set(selected.filter(v => v !== "None"));
+    const availableMods =
+      isHands && !gorillaArmsSelected
+        ? config.mods.filter(
+            mod => !HANDS_MODS_REQUIRING_GORILLA_ARMS.has(mod.name)
+          )
+        : config.mods;
 
     return base.concat(
-      config.mods
+      availableMods
         .map(m => m.name)
         .filter(name => {
           if (name === selected[slotIndex]) return true;
