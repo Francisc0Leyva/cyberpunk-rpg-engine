@@ -1,9 +1,11 @@
 import tagsData from "../data/constants/tags.json";
 import type {
   AttributeKey,
+  CyberModsState,
   TagChoices,
   TagSelections,
 } from "../types/character";
+import { CYBER_SYSTEMS } from "../data/cyberSystems";
 
 type TagEffect = {
   kind?: string;
@@ -52,6 +54,20 @@ const ATTRIBUTE_TARGETS: Record<string, AttributeKey> = {
   "attributes.skill": "skill",
   "attributes.technical": "technical",
   "attributes.technical_ability": "technical",
+};
+
+const CYBER_ATTRIBUTE_EFFECT_KEYS: Record<string, AttributeKey> = {
+  body_add: "body",
+  strength_add: "body",
+  cool_add: "cool",
+  willpower_add: "willpower",
+  int_add: "intelligence",
+  intelligence_add: "intelligence",
+  reflex_add: "reflexes",
+  reflexes_add: "reflexes",
+  skill_add: "skill",
+  technical_add: "technical",
+  technical_ability_add: "technical",
 };
 
 export function getAttributeTagBonusSources(
@@ -110,4 +126,79 @@ export function sumAttributeBonusSources(
     });
   });
   return totals;
+}
+
+function applyAttributeEffects(
+  values: Partial<Record<AttributeKey, number>>,
+  effects?: Record<string, unknown>
+) {
+  if (!effects) return;
+  Object.entries(CYBER_ATTRIBUTE_EFFECT_KEYS).forEach(
+    ([effectKey, attrKey]) => {
+      const raw = effects[effectKey];
+      const numeric = Number(raw);
+      if (!Number.isFinite(numeric) || numeric === 0) return;
+      values[attrKey] = (values[attrKey] ?? 0) + numeric;
+    }
+  );
+}
+
+export function getCyberAttributeBonusSources(
+  cyberMods: CyberModsState
+): AttributeBonusSource[] {
+  const sources: AttributeBonusSource[] = [];
+  const systemByName = CYBER_SYSTEMS.reduce<
+    Record<string, (typeof CYBER_SYSTEMS)[number]>
+  >((acc, system) => {
+    acc[system.system] = system;
+    return acc;
+  }, {});
+
+  Object.entries(cyberMods).forEach(([systemName, systemState]) => {
+    const systemConfig = systemByName[systemName];
+    if (!systemConfig) return;
+    const selectedMods = (systemState?.slots ?? []).filter(
+      name => name && name !== "None"
+    );
+    selectedMods.forEach(modName => {
+      const mod = systemConfig.mods.find(item => item.name === modName);
+      if (!mod) return;
+      const values: Partial<Record<AttributeKey, number>> = {};
+      applyAttributeEffects(values, mod.effects);
+      if (
+        systemName === "Operating System" &&
+        mod.base_effects &&
+        typeof mod.base_effects === "object"
+      ) {
+        applyAttributeEffects(
+          values,
+          mod.base_effects as Record<string, unknown>
+        );
+      }
+      if (
+        systemName === "Operating System" &&
+        mod.tiers &&
+        systemState?.tier
+      ) {
+        const numericTierKey = String(Number(systemState.tier));
+        const tierEffects =
+          mod.tiers[systemState.tier] ??
+          mod.tiers[numericTierKey];
+        if (tierEffects && typeof tierEffects === "object") {
+          applyAttributeEffects(
+            values,
+            tierEffects as Record<string, unknown>
+          );
+        }
+      }
+      if (Object.keys(values).length > 0) {
+        sources.push({
+          label: mod.name,
+          values,
+        });
+      }
+    });
+  });
+
+  return sources;
 }

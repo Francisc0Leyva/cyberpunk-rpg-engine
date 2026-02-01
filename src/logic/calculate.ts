@@ -204,7 +204,16 @@ export function computeDamage(
     bonusNotes,
   });
 
-  const rollHit = Math.random() <= adjusted.hitChance;
+  let rollHit = Math.random() <= adjusted.hitChance;
+  let rerolledMiss = false;
+  if (
+    !rollHit &&
+    adjusted.missRerollChance > 0 &&
+    Math.random() <= adjusted.missRerollChance
+  ) {
+    rollHit = Math.random() <= adjusted.hitChance;
+    rerolledMiss = true;
+  }
   let didCrit = false;
   if (rollHit) {
     if (adjusted.flags.force_crit) {
@@ -286,8 +295,17 @@ export function computeDamage(
         lines.push(
           `Proc: Feedback Circuit — Heal +${proc.amount} HP`
         );
+      } else if (proc.kind === "on_crit_status") {
+        lines.push(
+          `Proc: ${proc.status}${
+            proc.source ? ` — ${proc.source}` : ""
+          }`
+        );
       }
     });
+  }
+  if (rerolledMiss && adjusted.missRerollText) {
+    lines.push(`Proc: ${adjusted.missRerollText}`);
   }
 
   return lines.join("\n");
@@ -762,6 +780,8 @@ type CyberAdjustResult = {
   hitChance: number;
   critChance: number;
   critMult: number;
+  missRerollChance: number;
+  missRerollText?: string;
   flags: {
     force_crit: boolean;
     disable_crit: boolean;
@@ -773,6 +793,11 @@ type CyberAdjustResult = {
 type Proc =
   | { kind: "on_crit_heal"; amount: number }
   | {
+      kind: "on_crit_status";
+      status: string;
+      source?: string;
+    }
+  | {
       kind: "on_hit_status";
       status: string;
       chance: number;
@@ -782,6 +807,8 @@ type Proc =
 function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
   let { dmg, hitChance, critChance, critMult } = params;
   const { attackType, subtype, status, cybermods, tags, bonusNotes } = params;
+  let missRerollChance = 0;
+  let missRerollText: string | undefined;
 
   const flags = {
     force_crit: Boolean(status._force_crit),
@@ -809,7 +836,7 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
       : syskey(rawSystem);
     if (systemKey === osKey) {
       if (!osEffects || Object.keys(osEffects).length === 0) return;
-      applyEffects(osEffects);
+      applyEffects(osEffects, "Operating System");
       return;
     }
 
@@ -817,7 +844,7 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
       if (!id || id.startsWith("tier:")) return;
       const mod = lookupMod(systemKey, id);
       if (!mod) return;
-      applyEffects(mod.effects ?? {});
+      applyEffects(mod.effects ?? {}, mod.name ?? id);
     });
   });
 
@@ -910,150 +937,257 @@ function applyCybermodsToNumbers(params: CyberAdjustParams): CyberAdjustResult {
 
   hitChance = clamp01(hitChance);
   critChance = flags.disable_crit ? 0 : clamp01(critChance);
+  missRerollChance = clamp01(missRerollChance);
 
-  return { dmg, hitChance, critChance, critMult, flags, procs };
+  return {
+    dmg,
+    hitChance,
+    critChance,
+    critMult,
+    missRerollChance,
+    missRerollText,
+    flags,
+    procs,
+  };
 
-  function applyEffects(effects: LooseRecord) {
-    if (attackType === "ranged" && effects.ranged_accuracy_add) {
+  function applyEffects(effects: LooseRecord, sourceName?: string) {
+    const condition = effects.condition as string | undefined;
+    const conditionMatch = conditionAllowsEffect(condition);
+
+    if (
+      attackType === "ranged" &&
+      effects.ranged_accuracy_add &&
+      conditionMatch
+    ) {
       hitChance += effects.ranged_accuracy_add / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.ranged_accuracy_add}% ranged hit chance`
+      );
     }
-    if (effects.accuracy_set !== undefined) {
+    if (
+      effects.accuracy_set !== undefined &&
+      conditionMatch
+    ) {
       hitChance = effects.accuracy_set / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: hit chance set to ${effects.accuracy_set}%`
+      );
     }
-    if (effects.attack_chance !== undefined) {
+    if (
+      effects.attack_chance !== undefined &&
+      conditionMatch
+    ) {
       hitChance = Math.max(hitChance, effects.attack_chance / 100);
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: minimum hit chance ${effects.attack_chance}%`
+      );
     }
 
-    if (effects.condition === "smart_weapon" && smartWeapon) {
-      if (effects.accuracy_set !== undefined) {
-        hitChance = effects.accuracy_set / 100;
-      }
-      if (effects.crit_rate_set !== undefined) {
-        critChance = effects.crit_rate_set / 100;
-      }
-    }
-
-    if (attackType === "melee" && effects.melee_damage_add) {
+    if (
+      attackType === "melee" &&
+      effects.melee_damage_add &&
+      conditionMatch
+    ) {
       dmg *= 1 + effects.melee_damage_add / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.melee_damage_add}% melee damage`
+      );
     }
-    if (attackType === "ranged" && effects.ranged_damage_add) {
+    if (
+      attackType === "ranged" &&
+      effects.ranged_damage_add &&
+      conditionMatch
+    ) {
       dmg *= 1 + effects.ranged_damage_add / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.ranged_damage_add}% ranged damage`
+      );
     }
     if (
       (subtype === "unarmed" || subtype === "kick") &&
-      effects.unarmed_damage_add
+      effects.unarmed_damage_add &&
+      conditionMatch
     ) {
       dmg *= 1 + effects.unarmed_damage_add / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.unarmed_damage_add}% unarmed damage`
+      );
     }
 
     if (
-      effects.condition === "first_strike" &&
+      effects.first_attack_add &&
+      attackingFirst &&
       isFirstTurn &&
-      attackingFirst
+      conditionMatch
+    ) {
+      dmg *= 1 + effects.first_attack_add / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.first_attack_add}% damage on first attack`
+      );
+    }
+    if (
+      effects.damage_add_percent &&
+      conditionMatch &&
+      condition === "first_strike"
     ) {
       const pct = effects.damage_add_percent ?? 0;
       dmg *= 1 + pct / 100;
       bonusNotes.push(
-        `First Strike bonus: +${pct}% damage from cyberware`
+        `${sourceName ?? "Cyberware"}: +${pct}% damage on first strike`
       );
-    }
-    if (
-      effects.first_attack_add &&
-      attackingFirst &&
-      isFirstTurn
-    ) {
-      dmg *= 1 + effects.first_attack_add / 100;
-      bonusNotes.push(
-        `First Attack bonus: +${effects.first_attack_add}% damage from cyberware`
-      );
-    }
-    if (
-      effects.condition === "hp_below_50" &&
-      hpPercent < 50 &&
-      attackType === "melee"
-    ) {
-      dmg *= 1 + (effects.melee_damage_add ?? 0) / 100;
-    }
-    if (
-      effects.condition === "burn_inflicted" &&
-      status.has_burn &&
-      attackType === "melee"
-    ) {
-      dmg *= 1 + (effects.melee_damage_add ?? 0) / 100;
     }
 
-    if (status.berserk_active) {
-      dmg *= 1 + (effects.damage_add_percent ?? 0) / 100;
+    if (
+      status.berserk_active &&
+      effects.damage_add_percent
+    ) {
+      dmg *= 1 + effects.damage_add_percent / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.damage_add_percent}% damage (Berserk active)`
+      );
       if (effects.crit_reroll_once_per_battle) {
         flags.force_crit = true;
+        bonusNotes.push(
+          `${sourceName ?? "Cyberware"}: forces critical hit while Berserk is active`
+        );
       }
     }
 
-    if (effects.crit_rate_add) {
+    if (effects.crit_rate_add && conditionMatch) {
       critChance += effects.crit_rate_add / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.crit_rate_add}% crit chance`
+      );
+    }
+    if (effects.crit_rate_set !== undefined && conditionMatch) {
+      critChance = effects.crit_rate_set / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: crit chance set to ${effects.crit_rate_set}%`
+      );
     }
     if (
       effects.crit_chance_add &&
-      conditionAllowsCritBonus(effects.condition)
+      conditionMatch
     ) {
       critChance += effects.crit_chance_add / 100;
       bonusNotes.push(
-        `Critical chance +${effects.crit_chance_add}%${
-          effects.condition ? ` (condition: ${effects.condition})` : ""
-        }`
+        `${sourceName ?? "Cyberware"}: +${effects.crit_chance_add}% crit chance`
       );
     }
     if (
       (subtype === "unarmed" || subtype === "kick") &&
-      effects.unarmed_crit_rate_add
+      effects.unarmed_crit_rate_add &&
+      conditionMatch
     ) {
       critChance += effects.unarmed_crit_rate_add / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.unarmed_crit_rate_add}% unarmed crit chance`
+      );
     }
     if (
       (subtype === "unarmed" || subtype === "kick") &&
-      effects.unarmed_crit_rate_set
+      effects.unarmed_crit_rate_set !== undefined &&
+      conditionMatch
     ) {
       critChance = effects.unarmed_crit_rate_set / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: unarmed crit chance set to ${effects.unarmed_crit_rate_set}%`
+      );
     }
     if (
       (subtype === "unarmed" || subtype === "kick") &&
-      effects.unarmed_crit_damage_add
+      effects.unarmed_crit_damage_add &&
+      conditionMatch
     ) {
       critMult *= 1 + effects.unarmed_crit_damage_add / 100;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: +${effects.unarmed_crit_damage_add}% unarmed crit damage`
+      );
+    }
+    if (
+      (subtype === "unarmed" || subtype === "kick") &&
+      effects.unarmed_crit_inflict_bleed &&
+      conditionMatch
+    ) {
+      procs.push({
+        kind: "on_crit_status",
+        status: "Bleed",
+        source: sourceName ?? "Cyberware",
+      });
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: crits inflict Bleed`
+      );
     }
 
     if (
       effects.unarmed_disable_crit &&
-      (subtype === "unarmed" || subtype === "kick")
+      (subtype === "unarmed" || subtype === "kick") &&
+      conditionMatch
     ) {
       flags.disable_crit = true;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: unarmed attacks cannot crit`
+      );
     }
-    if (effects.crit_auto_on_low_hp && hpPercent <= 20) {
+    if (effects.crit_auto_on_low_hp && hpPercent <= 20 && conditionMatch) {
       flags.force_crit = true;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: forces crit while HP is 20% or lower`
+      );
     }
     if (
       effects.unarmed_scale_to_ceiling &&
-      (subtype === "unarmed" || subtype === "kick")
+      (subtype === "unarmed" || subtype === "kick") &&
+      conditionMatch
     ) {
       flags.force_max_roll = true;
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: unarmed damage uses max roll`
+      );
     }
 
-    if (effects.health_points_on_crit) {
+    if (effects.health_points_on_crit && conditionMatch) {
       procs.push({
         kind: "on_crit_heal",
         amount: effects.health_points_on_crit,
       });
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: restores ${effects.health_points_on_crit} HP on crit`
+      );
+    }
+    if (
+      effects.miss_reroll_chance &&
+      conditionMatch &&
+      attackType === "ranged"
+    ) {
+      missRerollChance = Math.max(
+        missRerollChance,
+        effects.miss_reroll_chance / 100
+      );
+      if (effects.special_text) {
+        missRerollText = String(effects.special_text);
+      }
+      bonusNotes.push(
+        `${sourceName ?? "Cyberware"}: ${effects.miss_reroll_chance}% chance to reroll missed attacks`
+      );
     }
 
-    function conditionAllowsCritBonus(condition?: string): boolean {
-      if (!condition) return true;
-      switch (condition) {
+    function conditionAllowsEffect(conditionName?: string): boolean {
+      if (!conditionName) return true;
+      switch (conditionName) {
+        case "smart_weapon":
+          return smartWeapon;
         case "start_of_battle":
           return isFirstTurn;
         case "sharp_weapon":
           return subtype === "sharp" || subtype === "slice";
         case "first_strike":
           return isFirstTurn && attackingFirst;
+        case "hp_below_50":
+        case "hp_below_50%":
+          return hpPercent < 50;
+        case "burn_inflicted":
+          return Boolean(status.has_burn);
         default:
           return true;
       }

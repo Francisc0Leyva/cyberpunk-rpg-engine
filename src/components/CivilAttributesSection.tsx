@@ -54,6 +54,8 @@ type CivilAttributesSectionProps = {
   attributes: CivilAttributes;
   bonusSources?: CivilBonusSource[];
   rollNotes?: Partial<Record<CivilAttributeKey, string>>;
+  loreAccurate?: boolean;
+  onLoreAccurateChange?: (nextValue: boolean) => void;
   onChange: (next: CivilAttributes) => void;
 };
 
@@ -61,6 +63,8 @@ export function CivilAttributesSection({
   attributes,
   bonusSources = DEFAULT_SOURCES,
   rollNotes = {},
+  loreAccurate = false,
+  onLoreAccurateChange,
   onChange,
 }: CivilAttributesSectionProps) {
   const bonusTotals = useMemo(
@@ -172,6 +176,7 @@ export function CivilAttributesSection({
   }
 
   function updateAttr(attr: CivilAttributeDef, value: string) {
+    if (loreAccurate) return;
     setDrafts(prev => ({
       ...prev,
       [attr.id]: value,
@@ -190,6 +195,7 @@ export function CivilAttributesSection({
   }
 
   function commitAttr(attr: CivilAttributeDef) {
+    if (loreAccurate) return;
     const raw = Number(drafts[attr.id]);
     const bonus = getBonus(bonusTotals, attr.id);
     const currentTotal = getTotal(attributes, bonusTotals, attr.id, {
@@ -214,6 +220,7 @@ export function CivilAttributesSection({
   }
 
   function stepAttr(attr: CivilAttributeDef, delta: number) {
+    if (loreAccurate) return;
     const current = getCurrentValueRef(attr);
     const next = clamp(attr, current + delta);
     updateAttr(attr, String(next));
@@ -313,12 +320,12 @@ export function CivilAttributesSection({
         const decHold = makeHoldHandlers(
           attr,
           -1,
-          () => getCurrentValueRef(attr) > attr.min
+          () => !loreAccurate && getCurrentValueRef(attr) > attr.min
         );
         const incHold = makeHoldHandlers(
           attr,
           1,
-          () => getCurrentValueRef(attr) < attr.max
+          () => !loreAccurate && getCurrentValueRef(attr) < attr.max
         );
         return (
           <div key={attr.id} className="civil-attribute">
@@ -329,7 +336,7 @@ export function CivilAttributesSection({
                   className="stepper-button"
                   type="button"
                   {...decHold}
-                  disabled={!canDecrease}
+                  disabled={loreAccurate || !canDecrease}
                 >
                   -
                 </button>
@@ -339,6 +346,7 @@ export function CivilAttributesSection({
                   min={attr.min}
                   max={attr.max}
                   value={drafts[attr.id]}
+                  disabled={loreAccurate}
                   onChange={(e) => updateAttr(attr, e.target.value)}
                   onBlur={() => commitAttr(attr)}
                 />
@@ -346,7 +354,7 @@ export function CivilAttributesSection({
                   className="stepper-button"
                   type="button"
                   {...incHold}
-                  disabled={!canIncrease}
+                  disabled={loreAccurate || !canIncrease}
                 >
                   +
                 </button>
@@ -373,6 +381,17 @@ export function CivilAttributesSection({
           </div>
         );
       })}
+      <div className="checkbox-row" style={{ marginTop: 6 }}>
+        <input
+          id="lore-accurate-civil"
+          type="checkbox"
+          checked={loreAccurate}
+          onChange={(e) =>
+            onLoreAccurateChange?.(e.target.checked)
+          }
+        />
+        <label htmlFor="lore-accurate-civil">lore accurate</label>
+      </div>
     </div>
   );
 }

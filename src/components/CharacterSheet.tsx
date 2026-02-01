@@ -30,10 +30,14 @@ import { DiceRollSection } from "./DiceRollSection";
 import { OriginsSection } from "./OriginsSection";
 import { ClassesSection, type ClassData } from "./ClassesSection";
 import {
+  getCyberCivilBonusSources,
   getCivilTagBonusSources,
   type CivilBonusSource,
 } from "../lib/civilBonuses";
-import { getAttributeTagBonusSources } from "../lib/attributeBonuses";
+import {
+  getAttributeTagBonusSources,
+  getCyberAttributeBonusSources,
+} from "../lib/attributeBonuses";
 
 type TagInfo = {
   description: string;
@@ -596,6 +600,20 @@ export function CharacterSheet() {
     setLoreAccurate(nextValue);
     if (nextValue) {
       setAttributes(defaultAttributes());
+      if (!selectedClass) {
+        setCivilAttributes(defaultCivilAttributes());
+        setClassRollNotes({});
+        return;
+      }
+      if (selectedClass.id === "defiant") {
+        applyClassCivil(selectedClass, {
+          subclass: defiantSubclass,
+          rolls: defiantRolls,
+          allocations: defiantAllocations,
+        });
+      } else {
+        applyClassCivil(selectedClass);
+      }
     }
   }
 
@@ -799,9 +817,7 @@ export function CharacterSheet() {
       allocations: DefiantAllocations;
     }
   ) {
-    const nextAttributes: CivilAttributes = {
-      ...character.civilAttributes,
-    };
+    const nextAttributes: CivilAttributes = defaultCivilAttributes();
     const nextNotes: ClassRollNotes = {};
     const isTechie = classData.id === "techie";
     const isDefiant = classData.id === "defiant";
@@ -1180,13 +1196,22 @@ export function CharacterSheet() {
     });
   }
 
-  const civilBonusSources: CivilBonusSource[] = [
-    {
-      label: "Origin",
-      values: character.origin.allocations,
-    },
-    ...getCivilTagBonusSources(character.tags, character.tagChoices),
-  ];
+  const civilBonusSources: CivilBonusSource[] = useMemo(
+    () => [
+      {
+        label: "Origin",
+        values: character.origin.allocations,
+      },
+      ...getCyberCivilBonusSources(character.cyberMods),
+      ...getCivilTagBonusSources(character.tags, character.tagChoices),
+    ],
+    [
+      character.origin.allocations,
+      character.cyberMods,
+      character.tags,
+      character.tagChoices,
+    ]
+  );
   const classAttributeBonusSources = useMemo(() => {
     if (selectedClassId !== "netrunner") return [];
     const choice = classAttributeChoicesByClass[selectedClassId];
@@ -1201,12 +1226,18 @@ export function CharacterSheet() {
   const attributeBonusSources = useMemo(
     () => [
       ...classAttributeBonusSources,
+      ...getCyberAttributeBonusSources(character.cyberMods),
       ...getAttributeTagBonusSources(
         character.tags,
         character.tagChoices
       ),
     ],
-    [classAttributeBonusSources, character.tags, character.tagChoices]
+    [
+      classAttributeBonusSources,
+      character.cyberMods,
+      character.tags,
+      character.tagChoices,
+    ]
   );
   const attributePointsSummary = useMemo(() => {
     if (!classAttributePoints) return null;
@@ -1319,6 +1350,8 @@ export function CharacterSheet() {
                 attributes={character.civilAttributes}
                 bonusSources={civilBonusSources}
                 rollNotes={classRollNotes}
+                loreAccurate={loreAccurate}
+                onLoreAccurateChange={handleLoreAccurateChange}
                 onChange={setCivilAttributes}
               />
               <StatusEffectsSection
